@@ -168,6 +168,8 @@
 - 2026-10-18 | 5.4 | StaffLayout (Sidebar/Header/UserMenu/Bell), ParentLayout (ChildSwitcher/MobileNav), UI: Button/Input/Avatar/Chip/Skeleton/EmptyState/Toast; build OK
 - 2026-10-18 | 6.1 | Admin: Tổng quan, Tài khoản (CRUD/khoá/reset MK), Năm học, Nhật ký; UI: Modal/ConfirmDialog/Select/Textarea/DataTable/StatTile/Tabs/SearchInput; hooks useFetch/usePagination
 - 2026-10-18 | 6.1 | Sửa logic: self-lock/role, LAST_ADMIN, xoá năm học có dữ liệu, mustChangePassword + mật khẩu tạm 1 lần, chính sách MK production; 5 test mới
+- 2026-10-18 | 6.4 | Trang Hôm nay PH: T7/CN hoặc chưa có dữ liệu → "Hôm nay bé nghỉ học" + liên kết ngày học gần nhất (Lịch nhận ?day=)
+- 2026-10-18 | 6.x | Script kiểm tra luồng GV (47 bước) và HT (80 bước) như client gọi: tất cả đạt; upload tắt vì Cloudinary chưa cấu hình
 - 2026-10-18 | 6.4 | Sửa PH không thấy con: login/refresh trả children; health API trả items; seed luôn có hôm nay; test parent-session
 - 2026-10-18 | 7.3 | Seed demo reset được, in danh sách tài khoản; sửa index sepayId (tiền mặt trùng null) + test
 - 2026-10-18 | 6.4 | GrowthChart: thay bảng xấp xỉ bằng LMS WHO gốc 0–60 tháng, ghi nguồn, nhận định z-score

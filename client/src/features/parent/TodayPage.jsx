@@ -7,6 +7,7 @@ import { dashboardApi } from '../../api/dashboard.api.js';
 import { menuApi } from '../../api/menu.api.js';
 import { dailyReportApi } from '../../api/dailyReport.api.js';
 import { Timeline } from '../../components/ui/Timeline.jsx';
+import { CalendarDays } from 'lucide-react';
 import { Chip, Skeleton, EmptyState, StatusChip } from '../../components/ui/index.js';
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
 import { PATHS } from '../../router/paths.js';
@@ -27,6 +28,10 @@ export default function TodayPage() {
   const me = data?.children?.find((c) => c._id === childId);
   const att = me?.attendanceToday;
   const rep = me?.reportToday;
+  // Không có điểm danh lẫn nhận xét hôm nay → tìm ngày học gần nhất để dẫn sang Lịch
+  const noData = !!data && !att && !rep;
+  const { data: recent } = useFetch(() => dailyReportApi.student(childId, {}), [childId, noData], { enabled: !!childId && noData });
+  const lastDay = recent?.find((r) => !dayjs(r.date).isSame(dayjs(), 'day'));
 
   // Đánh dấu PH đã xem nhận xét hôm nay
   useEffect(() => {
@@ -82,7 +87,24 @@ export default function TodayPage() {
           <h2 className="text-lg">Hôm nay của bé</h2>
           {att ? <StatusChip map={ATTENDANCE_STATUS} value={att.status} /> : <Chip tone="muted">Chưa điểm danh</Chip>}
         </div>
-        {loading ? <div className="space-y-3"><Skeleton className="h-5 w-2/3" /><Skeleton className="h-5 w-1/2" /><Skeleton className="h-5 w-3/5" /></div> : <Timeline items={items} />}
+        {loading ? (
+          <div className="space-y-3"><Skeleton className="h-5 w-2/3" /><Skeleton className="h-5 w-1/2" /><Skeleton className="h-5 w-3/5" /></div>
+        ) : noData ? (
+          <div className="rounded-card bg-paper px-4 py-6 text-center">
+            <CalendarDays size={28} strokeWidth={1.5} className="mx-auto mb-2 text-ink-soft" aria-hidden />
+            <p className="font-medium">{dow > 5 ? 'Hôm nay bé nghỉ học' : 'Hôm nay chưa có dữ liệu'}</p>
+            <p className="mt-1 text-sm text-ink-soft">{dow > 5 ? 'Cuối tuần không có điểm danh và nhận xét.' : 'Cô chưa điểm danh. Nhận xét thường có sau giờ ngủ trưa.'}</p>
+            {lastDay ? (
+              <Link to={`${PATHS.parent.calendar}?day=${dayjs(lastDay.date).format('YYYY-MM-DD')}`} className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-sky hover:underline">
+                Xem ngày học gần nhất: {dayjs(lastDay.date).format('dddd DD/MM')} <ChevronRight size={16} aria-hidden />
+              </Link>
+            ) : (
+              <Link to={PATHS.parent.calendar} className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-sky hover:underline">Xem lịch của bé <ChevronRight size={16} aria-hidden /></Link>
+            )}
+          </div>
+        ) : (
+          <Timeline items={items} />
+        )}
       </section>
 
       <section className="card p-4">

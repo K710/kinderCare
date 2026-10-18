@@ -221,7 +221,8 @@ async function main() {
     const sc = scenarios[i];
     const paymentCode = await uniquePaymentCode();
     // overdue: hạn đã qua; unpaid: hạn còn (cuối tháng); paid/partial: hạn mùng 10
-    const due = sc === 'unpaid' ? dayjs(TODAY).endOf('month').startOf('day').toDate() : sc === 'overdue' ? dayjs(TODAY).subtract(5, 'day').toDate() : dueDate;
+    // partial/unpaid: hạn cuối tháng (còn hạn); overdue: hạn đã qua; paid: hạn mùng 10
+    const due = sc === 'unpaid' || sc === 'partial' ? dayjs(TODAY).endOf('month').startOf('day').toDate() : sc === 'overdue' ? dayjs(TODAY).subtract(5, 'day').toDate() : dueDate;
     const paid = sc === 'paid' ? amount : sc === 'partial' ? 1500000 : 0;
     const t = await Tuition.create({ student: st._id, class: st.class, schoolYear: sy._id, month: MONTH, items, amount, paidAmount: paid, dueDate: toDateKey(due), paymentCode, createdBy: ht._id, status: computeStatus(amount, paid, toDateKey(due)) });
     tuitions.push(t);

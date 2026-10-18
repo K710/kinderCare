@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import { ChevronLeft, ChevronRight, Baby, Utensils, Moon, Smile } from 'lucide-react';
 import { useFetch } from '../../hooks/useFetch.js';
@@ -16,8 +17,10 @@ const DOT = { present: 'bg-leaf', late: 'bg-sky', excused: 'bg-sun', absent: 'bg
 // Lịch tháng: điểm danh từng ngày + nhận xét của ngày được chọn
 export default function CalendarPage() {
   const { child, childId } = useSelectedChild();
-  const [month, setMonth] = useState(dayjs().format('YYYY-MM'));
-  const [day, setDay] = useState(dayjs().format('YYYY-MM-DD'));
+  const [sp] = useSearchParams();
+  const initial = /^\d{4}-\d{2}-\d{2}$/.test(sp.get('day') || '') ? sp.get('day') : dayjs().format('YYYY-MM-DD');
+  const [month, setMonth] = useState(initial.slice(0, 7));
+  const [day, setDay] = useState(initial);
   const m = dayjs(`${month}-01`);
   const from = m.startOf('month').format('YYYY-MM-DD');
   const to = m.endOf('month').format('YYYY-MM-DD');
