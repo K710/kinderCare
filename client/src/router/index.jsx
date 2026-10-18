@@ -9,7 +9,6 @@ import Forbidden403 from '../pages/Forbidden403.jsx';
 import NotFound404 from '../pages/NotFound404.jsx';
 import { StaffLayout } from '../components/layout/StaffLayout.jsx';
 import { ParentLayout } from '../components/layout/ParentLayout.jsx';
-import ComingSoon from '../pages/ComingSoon.jsx';
 import AdminDashboardPage from '../features/admin/DashboardPage.jsx';
 import UsersPage from '../features/admin/UsersPage.jsx';
 import SchoolYearsPage from '../features/admin/SchoolYearsPage.jsx';
@@ -34,6 +33,12 @@ import HealthPage from '../features/teacher/HealthPage.jsx';
 import LeaveRequestsPage from '../features/teacher/LeaveRequestsPage.jsx';
 import MedicineNotesPage from '../features/teacher/MedicineNotesPage.jsx';
 import ChatPage from '../features/chat/ChatPage.jsx';
+import TodayPage from '../features/parent/TodayPage.jsx';
+import CalendarPage from '../features/parent/CalendarPage.jsx';
+import ParentTuitionsPage from '../features/parent/TuitionsPage.jsx';
+import PaymentPage, { TuitionReceiptPage } from '../features/parent/PaymentPage.jsx';
+import AccountPage from '../features/parent/AccountPage.jsx';
+import { ParentAlbumsPage, ParentMenuPage, ParentGrowthPage, ParentLeaveRequestsPage, ParentMedicineNotesPage } from '../features/parent/MorePages.jsx';
 
 // "/" → trang chủ theo vai trò (hoặc /login)
 function RootRedirect() {
@@ -41,8 +46,6 @@ function RootRedirect() {
   const token = useAuthStore((s) => s.accessToken);
   return <Navigate to={token && user ? ROLE_HOME[user.role] : PATHS.login} replace />;
 }
-
-const soon = (title) => ({ element: <ComingSoon title={title} /> });
 
 export const router = createBrowserRouter([
   { path: '/', element: <RootRedirect /> },
@@ -129,17 +132,21 @@ export const router = createBrowserRouter([
         path: PATHS.parent.root,
         element: <ParentLayout />,
         children: [
-          { index: true, ...soon('Hôm nay') },
-          { path: 'calendar', ...soon('Lịch') },
-          { path: 'chat', ...soon('Tin nhắn') },
-          { path: 'tuitions', ...soon('Học phí') },
-          { path: 'account', ...soon('Tài khoản') },
-          { path: 'albums', ...soon('Album ảnh') },
-          { path: 'menu', ...soon('Thực đơn') },
-          { path: 'growth', ...soon('Tăng trưởng') },
-          { path: 'leave-requests', ...soon('Đơn xin nghỉ') },
-          { path: 'medicine-notes', ...soon('Dặn thuốc') },
-          { path: 'notifications', ...soon('Thông báo') },
+          { index: true, element: <TodayPage /> },
+          { path: 'calendar', element: <CalendarPage /> },
+          { path: 'chat', element: <ChatPage /> },
+          { path: 'tuitions', element: <ParentTuitionsPage /> },
+          { path: 'tuitions/:id', element: <TuitionReceiptPage /> },
+          { path: 'tuitions/:id/pay', element: <PaymentPage /> },
+          { path: 'account', element: <AccountPage /> },
+          { path: 'albums', element: <ParentAlbumsPage /> },
+          { path: 'menu', element: <ParentMenuPage /> },
+          { path: 'growth', element: <ParentGrowthPage /> },
+          { path: 'leave-requests', element: <ParentLeaveRequestsPage /> },
+          { path: 'leave-requests/:id', element: <ParentLeaveRequestsPage /> },
+          { path: 'medicine-notes', element: <ParentMedicineNotesPage /> },
+          { path: 'medicine-notes/:id', element: <ParentMedicineNotesPage /> },
+          { path: 'notifications', element: <NotificationsPage /> },
         ],
       },
     ],

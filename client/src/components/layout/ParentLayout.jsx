@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ArrowLeft } from 'lucide-react';
 import { Avatar } from '../ui/index.js';
 import { NotificationBell, UserMenu } from './Header.jsx';
 import { MobileNav } from './MobileNav.jsx';
@@ -59,16 +59,42 @@ export function ChildSwitcher() {
   );
 }
 
+// Tiêu đề cho các trang ngoài 5 tab (mở từ lối tắt / thông báo)
+const EXTRA_TITLES = [
+  [PATHS.parent.albums, 'Album ảnh'],
+  [PATHS.parent.menu, 'Thực đơn tuần'],
+  [PATHS.parent.growth, 'Tăng trưởng'],
+  [PATHS.parent.leaveRequests, 'Đơn xin nghỉ'],
+  [PATHS.parent.medicineNotes, 'Dặn thuốc'],
+  [PATHS.parent.notifications, 'Thông báo'],
+];
+function parentTitle(pathname) {
+  const tab = PARENT_TABS.find((t) => (t.end ? t.to === pathname : pathname.startsWith(t.to)));
+  if (tab) {
+    if (tab.to === PATHS.parent.tuitions && pathname !== tab.to) return { title: pathname.endsWith('/pay') ? 'Thanh toán học phí' : 'Biên lai học phí', back: PATHS.parent.tuitions };
+    return { title: tab.label };
+  }
+  const extra = EXTRA_TITLES.find(([to]) => pathname.startsWith(to));
+  return { title: extra?.[1] || 'KinderCare', back: PATHS.parent.root };
+}
+
 // Bố cục phụ huynh: header có bé + chuông, nội dung cột giữa 640px, tab dưới trên mobile / tab ngang trên desktop
 export function ParentLayout() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const isHome = pathname === PATHS.parent.root;
+  const { title, back } = parentTitle(pathname);
 
   return (
     <div className="min-h-dvh pb-20 md:pb-8">
       <header className="sticky top-0 z-30 border-b border-line bg-surface">
         <div className="mx-auto flex h-16 max-w-parent items-center gap-2 px-4">
-          <div className="min-w-0 flex-1">{isHome ? <ChildSwitcher /> : <h1 className="truncate text-xl">{PARENT_TABS.find((t) => pathname.startsWith(t.to) && (!t.end || t.to === pathname))?.label || 'KinderCare'}</h1>}</div>
+          {back && (
+            <button type="button" onClick={() => navigate(back)} className="touch -ml-2 flex items-center justify-center rounded-btn text-ink-soft hover:text-ink" aria-label="Quay lại">
+              <ArrowLeft size={22} strokeWidth={1.75} aria-hidden />
+            </button>
+          )}
+          <div className="min-w-0 flex-1">{isHome ? <ChildSwitcher /> : <h1 className="truncate text-xl">{title}</h1>}</div>
           <NotificationBell to={PATHS.parent.notifications} />
           <div className="hidden md:block">
             <UserMenu accountTo={PATHS.parent.account} />
