@@ -100,7 +100,9 @@ async function main() {
   const teacherOf = (st) => (st.class.equals(la2._id) ? gv1 : gv2);
 
   /* ---------- Điểm danh + nhận xét 14 ngày gần nhất (bỏ T7/CN) ---------- */
+  // 14 ngày gần nhất bỏ T7/CN, nhưng luôn có HÔM NAY (kể cả cuối tuần) để trang Hôm nay của PH đủ mốc timeline
   const days = eachDay(dayjs(TODAY).subtract(13, 'day').toDate(), TODAY, { skipWeekend: true });
+  if (!days.some((d) => d.getTime() === TODAY.getTime())) days.push(TODAY);
   const ACT = ['Vẽ tranh', 'Hát múa', 'Kể chuyện', 'Xếp hình', 'Chơi ngoài trời', 'Làm quen chữ cái', 'Thể dục buổi sáng', 'Nặn đất sét', 'Học đếm số'];
   const COMMENT = [
     'Hôm nay bé rất ngoan, ăn hết suất và tự xúc cơm.',

@@ -10,6 +10,22 @@ import {
 import { MAX_REFRESH_TOKENS, ROLES } from '../config/constants.js';
 import { generateTempPassword } from '../utils/password.js';
 
+/**
+ * Hồ sơ trả cho client (login / refresh / me) – nguồn duy nhất.
+ * PH: kèm danh sách con đang học từ Student.parents (User.children đã bỏ).
+ */
+export async function toProfile(user) {
+  const result = user.toJSON();
+  if (user.role === ROLES.PARENT) {
+    result.children = await Student.find({ parents: user._id, status: 'active' })
+      .select('fullName nickname avatar class dateOfBirth gender')
+      .populate('class', 'name ageGroup')
+      .sort('fullName')
+      .lean();
+  }
+  return result;
+}
+
 function issueTokens(user) {
   return { accessToken: signAccessToken(user), refreshToken: signRefreshToken(user) };
 }
@@ -33,7 +49,7 @@ export async function login({ identifier, password }) {
 
   const tokens = issueTokens(user);
   await pushRefreshToken(user, tokens.refreshToken);
-  return { user: user.toJSON(), ...tokens };
+  return { user: await toProfile(user), ...tokens };
 }
 
 // Xoay vòng refresh token: token cũ bị thu hồi, cấp cặp mới
@@ -61,7 +77,7 @@ export async function refresh(refreshToken) {
   const next = [...remaining, hashToken(tokens.refreshToken)].slice(-MAX_REFRESH_TOKENS);
   await User.updateOne({ _id: user._id }, { $set: { refreshTokens: next } });
 
-  return { user: user.toJSON(), ...tokens };
+  return { user: await toProfile(user), ...tokens };
 }
 
 export async function logout(userId, refreshToken) {
@@ -85,16 +101,7 @@ export async function register(data) {
 export async function getMe(userId) {
   const user = await User.findById(userId);
   if (!user) throw ApiError.notFound('Không tìm thấy tài khoản');
-  const result = user.toJSON();
-  // PH: kèm danh sách con đang học, lấy từ Student.parents (nguồn duy nhất)
-  if (user.role === ROLES.PARENT) {
-    result.children = await Student.find({ parents: userId, status: 'active' })
-      .select('fullName nickname avatar class dateOfBirth gender')
-      .populate('class', 'name ageGroup')
-      .sort('fullName')
-      .lean();
-  }
-  return result;
+  return toProfile(user);
 }
 
 export async function updateMe(userId, data) {

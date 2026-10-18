@@ -129,6 +129,7 @@
 - Seed (`npm run seed`, chỉ dev, từ chối production trừ --force): XOÁ TOÀN BỘ DB rồi tạo lại demo (1 admin, 1 HT, 2 GV, 3 PH chính + 6 PH phụ, 2 lớp, 10 bé, 10 ngày điểm danh/nhận xét, 8 tháng cân đo, thực đơn, kế hoạch, album, học phí đủ trạng thái, 1 unmatched, đơn nghỉ, dặn thuốc, tin nhắn); PRNG cố định để lặp lại giống nhau.
 - [Thanh toán – cần xác nhận] Payment.sepayId: đổi unique sparse → unique partial (`$type: number`). Lý do: sparse không bỏ qua `null`, giao dịch tiền mặt thứ hai bị E11000; thêm test hồi quy.
 - GrowthChart dùng dữ liệu WHO gốc: utils/whoGrowth.js chứa tham số LMS 0–60 tháng (weight-for-age, length/height-for-age, theo giới) tải từ who.int, tính giá trị tại z bằng công thức LMS + z-score lần đo gần nhất; ghi nguồn dưới biểu đồ.
+- Hồ sơ user trả cho client (login / refresh / me) dùng chung `auth.service.toProfile`: PH luôn kèm `children` từ Student.parents (status active). Trước đó login/refresh thiếu children → PH thấy "chưa có bé".
 - Token thêm `role.principal.soft/dark` (#EFEBFE/#5A3FD0) cho chip Hiệu trưởng theo phản hồi UI; Chip có tone `principal`.
 
 ## Nhật ký
@@ -167,6 +168,7 @@
 - 2026-10-18 | 5.4 | StaffLayout (Sidebar/Header/UserMenu/Bell), ParentLayout (ChildSwitcher/MobileNav), UI: Button/Input/Avatar/Chip/Skeleton/EmptyState/Toast; build OK
 - 2026-10-18 | 6.1 | Admin: Tổng quan, Tài khoản (CRUD/khoá/reset MK), Năm học, Nhật ký; UI: Modal/ConfirmDialog/Select/Textarea/DataTable/StatTile/Tabs/SearchInput; hooks useFetch/usePagination
 - 2026-10-18 | 6.1 | Sửa logic: self-lock/role, LAST_ADMIN, xoá năm học có dữ liệu, mustChangePassword + mật khẩu tạm 1 lần, chính sách MK production; 5 test mới
+- 2026-10-18 | 6.4 | Sửa PH không thấy con: login/refresh trả children; health API trả items; seed luôn có hôm nay; test parent-session
 - 2026-10-18 | 7.3 | Seed demo reset được, in danh sách tài khoản; sửa index sepayId (tiền mặt trùng null) + test
 - 2026-10-18 | 6.4 | GrowthChart: thay bảng xấp xỉ bằng LMS WHO gốc 0–60 tháng, ghi nguồn, nhận định z-score
 - 2026-10-18 | 6.4 | PH: Hôm nay (timeline), Lịch, Học phí + Thanh toán QR + Biên lai, Tài khoản, Album, Thực đơn, Tăng trưởng, Xin nghỉ, Dặn thuốc, Chat

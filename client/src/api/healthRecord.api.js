@@ -1,7 +1,7 @@
 import { api } from './axios.js';
 
 export const healthRecordApi = {
-  student: (studentId) => api.get(`/health-records/student/${studentId}`).then((r) => r.data.data),
+  student: (studentId) => api.get(`/health-records/student/${studentId}`).then((r) => r.data.data.items), // server trả { items, latest }
   create: (data) => api.post('/health-records', data).then((r) => r.data.data),
   bulk: (data) => api.post('/health-records/bulk', data).then((r) => r.data.data),
   update: (id, data) => api.patch(`/health-records/${id}`, data).then((r) => r.data.data),

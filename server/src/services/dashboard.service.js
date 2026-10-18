@@ -103,7 +103,7 @@ export async function parent(user) {
   const kidIds = kids.map((k) => k._id);
   const [att, reports, tuitions] = await Promise.all([
     Attendance.find({ student: { $in: kidIds }, date: today }).lean(),
-    DailyReport.find({ student: { $in: kidIds }, date: today }).select('student mood meals sleep comment parentSeenAt').lean(),
+    DailyReport.find({ student: { $in: kidIds }, date: today }).select('student mood meals sleep toilet activities comment photos parentSeenAt').lean(),
     Tuition.find({ student: { $in: kidIds }, status: { $in: ['unpaid', 'partial', 'overdue'] } }).select('student month amount paidAmount status dueDate paymentCode').lean(),
   ]);
   const children = kids.map((k) => {
