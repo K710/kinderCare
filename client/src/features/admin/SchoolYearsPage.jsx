@@ -90,7 +90,6 @@ export default function SchoolYearsPage() {
   const [formYear, setFormYear] = useState(undefined);
   const [deleteYear, setDeleteYear] = useState(null);
   const [currentYear, setCurrentYear] = useState(null);
-  const iconBtn = 'touch md:min-h-9 md:min-w-9 inline-flex items-center justify-center rounded-btn text-ink-soft hover:bg-paper hover:text-ink disabled:opacity-40';
 
   const run = (fn, ok) => fn().then(() => { toast.success(ok); reload(); }).catch((e) => toast.error(errorMessage(e)));
 
@@ -128,19 +127,11 @@ export default function SchoolYearsPage() {
             key: 'actions',
             title: '',
             align: 'right',
-            render: (y) => (
-              <div className="flex justify-end gap-1">
-                <button className={iconBtn} disabled={y.isCurrent} onClick={() => setCurrentYear(y)} aria-label={`Đặt ${y.name} làm hiện tại`} title={y.isCurrent ? 'Đang là năm hiện tại' : 'Đặt làm hiện tại'}>
-                  <Star size={18} strokeWidth={1.75} />
-                </button>
-                <button className={iconBtn} onClick={() => setFormYear(y)} aria-label={`Sửa ${y.name}`} title="Sửa">
-                  <Pencil size={18} strokeWidth={1.75} />
-                </button>
-                <button className={`${iconBtn} hover:text-berry`} disabled={y.isCurrent} onClick={() => setDeleteYear(y)} aria-label={`Xoá ${y.name}`} title={y.isCurrent ? 'Không xoá năm hiện tại' : 'Xoá'}>
-                  <Trash2 size={18} strokeWidth={1.75} />
-                </button>
-              </div>
-            ),
+            actions: (y) => [
+              { key: 'current', label: 'Đặt làm hiện tại', tooltip: y.isCurrent ? 'Đang là năm hiện tại' : undefined, icon: Star, disabled: y.isCurrent, onClick: () => setCurrentYear(y) },
+              { key: 'edit', label: 'Sửa', icon: Pencil, onClick: () => setFormYear(y) },
+              { key: 'delete', label: 'Xoá', tooltip: y.isCurrent ? 'Không xoá năm hiện tại' : undefined, icon: Trash2, danger: true, disabled: y.isCurrent, onClick: () => setDeleteYear(y) },
+            ],
           },
         ]}
       />
@@ -161,7 +152,7 @@ export default function SchoolYearsPage() {
         danger
         title="Xoá năm học"
         confirmLabel="Xoá năm học"
-        message={`Chỉ xoá được khi ${deleteYear?.name} chưa có lớp nào. Thao tác không hoàn tác.`}
+        message={`Chỉ xoá được khi ${deleteYear?.name} chưa có lớp và học phí. Thao tác không hoàn tác.`}
       />
     </>
   );

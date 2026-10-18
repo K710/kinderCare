@@ -35,7 +35,6 @@ export default function AdminDashboardPage() {
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-xs text-ink-soft">{label(roles)}</p>
         </section>
 
         <section className="lg:col-span-2">
@@ -58,7 +57,7 @@ export default function AdminDashboardPage() {
                   </div>
                 ),
               },
-              { key: 'role', title: 'Vai trò', render: (u) => <RoleChip role={u.role} /> },
+              { key: 'role', title: 'Vai trò', card: 'chip', render: (u) => <RoleChip role={u.role} /> },
               {
                 key: 'lastLoginAt',
                 title: 'Lần cuối',
@@ -74,11 +73,4 @@ export default function AdminDashboardPage() {
       </div>
     </>
   );
-}
-
-function label(roles) {
-  const t = roles.teacher ?? 0;
-  const p = roles.parent ?? 0;
-  if (!t && !p) return 'Thêm tài khoản giáo viên và phụ huynh để bắt đầu.';
-  return `${t} giáo viên · ${p} phụ huynh`;
 }

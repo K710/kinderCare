@@ -1,6 +1,6 @@
 # PROGRESS
 
-**Giai đoạn hiện tại:** 6 (dừng sau 6.1 chờ duyệt giao diện)
+**Giai đoạn hiện tại:** 6 (dừng cuối GĐ6 chờ duyệt giao diện)
 **Task tiếp theo:** 6.2
 
 ## GĐ1 – Thiết kế
@@ -118,6 +118,8 @@
 - Message: chỉ T↔PH có bé chung (canChat); history phân trang cursor ?before; chat chỉ cho role teacher/parent.
 - AuditLog: middleware audit(action, resource) ghi sau res.finish (không chặn request), mặc định chỉ 2xx, LOGIN ghi cả thất bại; che password/token; list không trả payload. Gắn vào auth, users, school-years, classes, students, tuitions, notifications.
 - Dashboard: 4 endpoint theo role, tái dùng tuition.summary / notification.unreadCount / message.unreadTotal.
+- DataTable < 768px tự chuyển dạng thẻ (cột `card: header|chip|meta|false`); cột `actions(row)` → desktop nút icon (IconButton có tooltip + aria-label), mobile gom vào ActionMenu "⋯". Áp dụng cho mọi bảng.
+- Token thêm `role.principal.soft/dark` (#EFEBFE/#5A3FD0) cho chip Hiệu trưởng theo phản hồi UI; Chip có tone `principal`.
 
 ## Nhật ký
 <!-- YYYY-MM-DD | task | việc đã làm (≤15 từ) -->
@@ -155,3 +157,4 @@
 - 2026-10-18 | 5.4 | StaffLayout (Sidebar/Header/UserMenu/Bell), ParentLayout (ChildSwitcher/MobileNav), UI: Button/Input/Avatar/Chip/Skeleton/EmptyState/Toast; build OK
 - 2026-10-18 | 6.1 | Admin: Tổng quan, Tài khoản (CRUD/khoá/reset MK), Năm học, Nhật ký; UI: Modal/ConfirmDialog/Select/Textarea/DataTable/StatTile/Tabs/SearchInput; hooks useFetch/usePagination
 - 2026-10-18 | 6.1 | Sửa logic: self-lock/role, LAST_ADMIN, xoá năm học có dữ liệu, mustChangePassword + mật khẩu tạm 1 lần, chính sách MK production; 5 test mới
+- 2026-10-18 | 6.1 | Sửa UI theo phản hồi: bảng→thẻ mobile, ActionMenu, Tooltip/IconButton, chip HT tím, lọc 2 cột, autofill, drawer

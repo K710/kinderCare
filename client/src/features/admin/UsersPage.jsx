@@ -36,7 +36,7 @@ function UserFormModal({ open, onClose, user, onSaved, isSelf }) {
     resolver: zodResolver(isEdit ? editSchema : createSchema),
     values: user
       ? { fullName: user.fullName, email: user.email, phone: user.phone || '', role: user.role }
-      : { fullName: '', email: '', phone: '', role: 'parent' },
+      : { fullName: '', email: '', phone: '', role: '' }, // bắt buộc chọn vai trò
   });
   const [serverError, setServerError] = useState('');
 
@@ -81,6 +81,7 @@ function UserFormModal({ open, onClose, user, onSaved, isSelf }) {
         <Select
           label="Vai trò"
           options={ROLE_OPTIONS}
+          placeholder={isEdit ? undefined : 'Chọn vai trò'}
           disabled={isSelf}
           hint={isSelf ? 'Bạn không thể tự đổi vai trò của mình.' : undefined}
           error={formState.errors.role?.message}
@@ -143,8 +144,6 @@ export default function UsersPage() {
     }).catch((e) => toast.error(errorMessage(e)));
   };
 
-  const iconBtn = 'touch md:min-h-9 md:min-w-9 inline-flex items-center justify-center rounded-btn text-ink-soft hover:bg-paper hover:text-ink';
-
   return (
     <>
       <PageHeader
@@ -156,8 +155,9 @@ export default function UsersPage() {
         }
       />
 
-      <div className="mb-4 grid gap-3 md:grid-cols-[1fr_180px_180px]">
-        <SearchInput value={filters.search} onChange={(v) => setFilters({ search: v })} placeholder="Tìm theo tên, email, số điện thoại" />
+      {/* Mobile: ô tìm full hàng, 2 select lọc cạnh nhau */}
+      <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-[1fr_180px_180px]">
+        <SearchInput className="col-span-2 md:col-span-1" value={filters.search} onChange={(v) => setFilters({ search: v })} placeholder="Tìm theo tên, email, số điện thoại" />
         <Select value={filters.role} onChange={(e) => setFilters({ role: e.target.value })} options={ROLE_OPTIONS} placeholder="Mọi vai trò" aria-label="Lọc vai trò" />
         <Select
           value={filters.isActive}
@@ -198,10 +198,11 @@ export default function UsersPage() {
             ),
           },
           { key: 'phone', title: 'Số điện thoại', render: (u) => <span className="tabular-nums">{u.phone || '—'}</span> },
-          { key: 'role', title: 'Vai trò', render: (u) => <RoleChip role={u.role} /> },
+          { key: 'role', title: 'Vai trò', card: 'chip', render: (u) => <RoleChip role={u.role} /> },
           {
             key: 'isActive',
             title: 'Trạng thái',
+            card: 'chip',
             render: (u) => (u.isActive ? <Chip tone="leaf">Hoạt động</Chip> : <Chip tone="berry" icon={Lock}>Bị khoá</Chip>),
           },
           {
@@ -220,25 +221,23 @@ export default function UsersPage() {
             key: 'actions',
             title: '',
             align: 'right',
-            render: (u) => (
-              <div className="flex justify-end gap-1">
-                <button className={iconBtn} onClick={() => setFormUser(u)} aria-label={`Sửa ${u.fullName}`} title="Sửa">
-                  <Pencil size={18} strokeWidth={1.75} />
-                </button>
-                <button className={iconBtn} onClick={() => setResetUser(u)} aria-label={`Đặt lại mật khẩu ${u.fullName}`} title="Đặt lại mật khẩu">
-                  <KeyRound size={18} strokeWidth={1.75} />
-                </button>
-                <button
-                  className={iconBtn}
-                  disabled={u._id === me?._id}
-                  onClick={() => setLockUser(u)}
-                  aria-label={u.isActive ? `Khoá ${u.fullName}` : `Mở khoá ${u.fullName}`}
-                  title={u._id === me?._id ? 'Không thể tự khoá mình' : u.isActive ? 'Khoá' : 'Mở khoá'}
-                >
-                  {u.isActive ? <Lock size={18} strokeWidth={1.75} /> : <LockOpen size={18} strokeWidth={1.75} className="text-leaf" />}
-                </button>
-              </div>
-            ),
+            actions: (u) => {
+              const isMe = u._id === me?._id;
+              return [
+                { key: 'edit', label: 'Sửa', icon: Pencil, onClick: () => setFormUser(u) },
+                { key: 'reset', label: 'Đặt lại mật khẩu', icon: KeyRound, onClick: () => setResetUser(u) },
+                {
+                  key: 'lock',
+                  label: u.isActive ? 'Khoá' : 'Mở khoá',
+                  tooltip: isMe ? 'Không thể tự khoá mình' : undefined,
+                  icon: u.isActive ? Lock : LockOpen,
+                  iconClassName: u.isActive ? undefined : 'text-leaf',
+                  danger: u.isActive,
+                  disabled: isMe,
+                  onClick: () => setLockUser(u),
+                },
+              ];
+            },
           },
         ]}
       />

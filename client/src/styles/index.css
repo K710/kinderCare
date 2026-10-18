@@ -31,6 +31,18 @@
   :focus-visible {
     @apply outline-none ring-2 ring-sky ring-offset-2 ring-offset-paper;
   }
+  /* Autofill: giữ nền surface + chữ ink thay vì màu vàng/xanh của trình duyệt */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  textarea:-webkit-autofill {
+    -webkit-text-fill-color: theme('colors.ink.DEFAULT');
+    -webkit-box-shadow: 0 0 0 1000px theme('colors.surface') inset;
+    box-shadow: 0 0 0 1000px theme('colors.surface') inset;
+    caret-color: theme('colors.ink.DEFAULT');
+    transition: background-color 9999s ease-in-out 0s;
+  }
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

@@ -42,8 +42,10 @@ export default function AuditLogsPage() {
     <>
       <PageHeader description="Mọi thao tác quan trọng được ghi lại và tự xoá sau 180 ngày." />
 
-      <div className="mb-4 grid gap-3 md:grid-cols-[1fr_180px_180px]">
+      {/* Mobile: select full hàng, 2 ô ngày cạnh nhau */}
+      <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-[1fr_180px_180px]">
         <Select
+          className="col-span-2 md:col-span-1"
           value={filters.action}
           onChange={(e) => setFilters({ action: e.target.value })}
           placeholder="Mọi hành động"
@@ -64,7 +66,7 @@ export default function AuditLogsPage() {
         onRowClick={openDetail}
         emptyTitle="Không có nhật ký khớp bộ lọc"
         columns={[
-          { key: 'createdAt', title: 'Thời gian', className: 'whitespace-nowrap', render: (l) => <span className="tabular-nums text-ink-soft">{formatDateTime(l.createdAt)}</span> },
+          { key: 'createdAt', title: 'Thời gian', className: 'whitespace-nowrap', card: 'meta', render: (l) => <span className="tabular-nums text-ink-soft">{formatDateTime(l.createdAt)}</span> },
           {
             key: 'user',
             title: 'Người thực hiện',
@@ -84,6 +86,7 @@ export default function AuditLogsPage() {
           {
             key: 'action',
             title: 'Hành động',
+            card: 'header',
             render: (l) => (
               <div>
                 <p className="font-medium">{ACTION_LABEL[l.action] || l.action}</p>
@@ -92,8 +95,8 @@ export default function AuditLogsPage() {
             ),
           },
           { key: 'path', title: 'Yêu cầu', render: (l) => <code className="text-xs text-ink-soft">{l.method} {l.path}</code> },
-          { key: 'statusCode', title: 'Kết quả', render: (l) => <Chip tone={statusTone(l.statusCode)}>{l.statusCode}</Chip> },
-          { key: 'ip', title: 'IP', className: 'hidden lg:table-cell', render: (l) => <span className="text-xs text-ink-soft tabular-nums">{l.ip}</span> },
+          { key: 'statusCode', title: 'Kết quả', card: 'chip', render: (l) => <Chip tone={statusTone(l.statusCode)}>{l.statusCode}</Chip> },
+          { key: 'ip', title: 'IP', className: 'hidden lg:table-cell', card: false, render: (l) => <span className="text-xs text-ink-soft tabular-nums">{l.ip}</span> },
         ]}
       />
 

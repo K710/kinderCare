@@ -7,6 +7,7 @@ const TONE = {
   sky: 'bg-sky-soft text-[#1F6FA8]',
   peach: 'bg-peach-soft text-[#B5412F]',
   berry: 'bg-berry-soft text-berry',
+  principal: 'bg-role-principal-soft text-role-principal-dark', // chip vai trò Hiệu trưởng (DESIGN.md: #7A5AF8)
   muted: 'bg-paper text-ink-soft border border-line',
 };
 

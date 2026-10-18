@@ -14,7 +14,7 @@ export default {
         sky: { DEFAULT: '#4BA3E3', soft: '#E4F1FB' },
         peach: { DEFAULT: '#FF7F6E', soft: '#FFE9E5' },
         berry: { DEFAULT: '#D6455D', soft: '#FBE4E8' },
-        role: { admin: '#5B6478', principal: '#7A5AF8', teacher: '#2F9E5B', parent: '#F28C28' },
+        role: { admin: '#5B6478', principal: { DEFAULT: '#7A5AF8', soft: '#EFEBFE', dark: '#5A3FD0' }, teacher: '#2F9E5B', parent: '#F28C28' },
       },
       fontFamily: {
         display: ['"Baloo 2"', 'system-ui', 'sans-serif'],
