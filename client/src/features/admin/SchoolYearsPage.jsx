@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Plus, Pencil, Trash2, Star, CheckCircle2 } from 'lucide-react';
@@ -7,7 +7,7 @@ import { schoolYearApi } from '../../api/schoolYear.api.js';
 import { errorMessage } from '../../api/axios.js';
 import { useFetch } from '../../hooks/useFetch.js';
 import { toast } from '../../stores/toast.store.js';
-import { Button, Input, DataTable, Chip, Modal, ConfirmDialog } from '../../components/ui/index.js';
+import { Button, Input, DataTable, Chip, Modal, ConfirmDialog, DatePicker } from '../../components/ui/index.js';
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
 import { PageHeader } from '../../components/layout/PageHeader.jsx';
 import { formatDate, formatMoney } from '../../utils/format.js';
@@ -28,7 +28,7 @@ const toInput = (d) => (d ? dayjs(d).format('YYYY-MM-DD') : '');
 function SchoolYearModal({ open, onClose, year, onSaved }) {
   const isEdit = !!year;
   const [serverError, setServerError] = useState('');
-  const { register, handleSubmit, formState, reset } = useForm({
+  const { register, handleSubmit, formState, reset, control } = useForm({
     resolver: zodResolver(schema),
     values: year
       ? { name: year.name, startDate: toInput(year.startDate), endDate: toInput(year.endDate), tuitionDefault: year.tuitionDefault || 0, isCurrent: year.isCurrent }
@@ -67,8 +67,8 @@ function SchoolYearModal({ open, onClose, year, onSaved }) {
       <form id="sy-form" onSubmit={handleSubmit(submit)} className="space-y-4" noValidate>
         <Input label="Tên năm học" placeholder="2025-2026" error={formState.errors.name?.message} {...register('name')} />
         <div className="grid grid-cols-2 gap-3">
-          <Input label="Bắt đầu" type="date" error={formState.errors.startDate?.message} {...register('startDate')} />
-          <Input label="Kết thúc" type="date" error={formState.errors.endDate?.message} {...register('endDate')} />
+          <Controller name="startDate" control={control} render={({ field }) => <DatePicker label="Bắt đầu" value={field.value} onChange={field.onChange} error={formState.errors.startDate?.message} />} />
+          <Controller name="endDate" control={control} render={({ field }) => <DatePicker label="Kết thúc" value={field.value} onChange={field.onChange} error={formState.errors.endDate?.message} />} />
         </div>
         <Input label="Học phí mặc định / tháng (₫)" type="number" inputMode="numeric" min={0} step={10000} error={formState.errors.tuitionDefault?.message} {...register('tuitionDefault')} />
         <label className="flex items-center gap-2 text-sm">

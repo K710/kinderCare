@@ -12,7 +12,7 @@ import { Chip, Skeleton, EmptyState, StatusChip } from '../../components/ui/inde
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
 import { PATHS } from '../../router/paths.js';
 import { ATTENDANCE_STATUS, MEAL_LABEL, MOOD_LABEL, DAY_LABEL } from '../../utils/constants.js';
-import { formatMoney, formatTime, formatSleep, childName } from '../../utils/format.js';
+import { formatMoney, formatTime, formatSleep, childName, teacherShort } from '../../utils/format.js';
 import dayjs from '../../utils/dayjs.js';
 
 const mealText = (v) => (v ? MEAL_LABEL[v] : null);
@@ -109,11 +109,10 @@ export default function TodayPage() {
       </section>
 
       <section className="card p-4">
-        <h2 className="text-base">Lời nhắn của cô</h2>
+        <h2 className="text-base">{rep?.teacher ? `Lời nhắn của ${teacherShort(rep.teacher)}` : 'Lời nhắn của cô'}</h2>
         {loading ? <Skeleton className="mt-2 h-10 w-full" /> : rep?.comment ? (
           <>
-            {rep.teacher?.fullName && <p className="mt-2 text-sm text-ink-soft">Cô/Thầy {rep.teacher.fullName} nhắn:</p>}
-            <p className="mt-1 whitespace-pre-line text-sm leading-relaxed">“{rep.comment}”</p>
+            <p className="mt-2 whitespace-pre-line text-sm leading-relaxed">“{rep.comment}”</p>
           </>
         ) : (
           <p className="mt-2 text-sm text-ink-soft">Cô chưa gửi lời nhắn hôm nay. Thường có sau giờ ngủ trưa.</p>

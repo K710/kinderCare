@@ -14,5 +14,6 @@ export { DataTable, Pagination, RowActions } from './Table.jsx';
 export { StatTile } from './StatTile.jsx';
 export { Tabs } from './Tabs.jsx';
 export { Tooltip } from './Tooltip.jsx';
+export { DatePicker } from './DatePicker.jsx';
 export { IconButton } from './IconButton.jsx';
 export { ActionMenu } from './ActionMenu.jsx';

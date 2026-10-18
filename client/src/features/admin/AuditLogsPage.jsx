@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { auditLogApi } from '../../api/auditLog.api.js';
 import { useFetch } from '../../hooks/useFetch.js';
 import { usePagination } from '../../hooks/usePagination.js';
-import { Select, Input, DataTable, Chip, Modal, Button, Avatar } from '../../components/ui/index.js';
+import { Select, Input, DataTable, Chip, Modal, Button, Avatar, DatePicker } from '../../components/ui/index.js';
 import { RoleChip } from '../../components/shared/RoleChip.jsx';
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
 import { PageHeader } from '../../components/layout/PageHeader.jsx';
@@ -52,8 +52,8 @@ export default function AuditLogsPage() {
           options={(actions || []).sort().map((a) => ({ value: a, label: ACTION_LABEL[a] ? `${ACTION_LABEL[a]} (${a})` : a }))}
           aria-label="Lọc hành động"
         />
-        <Input type="date" value={filters.from} onChange={(e) => setFilters({ from: e.target.value })} aria-label="Từ ngày" />
-        <Input type="date" value={filters.to} onChange={(e) => setFilters({ to: e.target.value ? `${e.target.value}T23:59:59` : '' })} aria-label="Đến ngày" />
+        <DatePicker value={filters.from} onChange={(v) => setFilters({ from: v })} placeholder="Từ ngày" aria-label="Từ ngày" />
+        <DatePicker value={filters.to.slice(0, 10)} onChange={(v) => setFilters({ to: v ? `${v}T23:59:59` : '' })} placeholder="Đến ngày" aria-label="Đến ngày" />
       </div>
 
       <ErrorBanner message={error} onRetry={reload} className="mb-4" />

@@ -4,7 +4,7 @@ import { ApiError } from '../utils/ApiError.js';
 import { toDateKey, todayKey, dayjs } from '../utils/date.js';
 
 const STUDENT_FIELDS = 'fullName nickname avatar';
-const TEACHER_FIELDS = 'fullName avatar';
+const TEACHER_FIELDS = 'fullName avatar honorific';
 
 // Danh sách HS lớp + nhận xét của ngày (null nếu chưa có)
 export async function listByClass({ class: classId, date }) {

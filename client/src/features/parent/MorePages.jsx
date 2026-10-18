@@ -9,15 +9,15 @@ import { leaveRequestApi } from '../../api/leaveRequest.api.js';
 import { medicineNoteApi } from '../../api/medicineNote.api.js';
 import { errorMessage } from '../../api/axios.js';
 import { toast } from '../../stores/toast.store.js';
-import { Button, Input, Textarea, Modal, Skeleton, EmptyState, StatusChip, Tabs, ConfirmDialog, Pagination, IconButton, Chip } from '../../components/ui/index.js';
+import { Button, Input, Textarea, Modal, Skeleton, EmptyState, StatusChip, Tabs, ConfirmDialog, Pagination, IconButton, Chip, DatePicker } from '../../components/ui/index.js';
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
 import { FormError } from '../../components/shared/FormError.jsx';
-import { GrowthChart } from '../../components/shared/GrowthChart.jsx';
+import { GrowthChart, latestRecord } from '../../components/shared/GrowthChart.jsx';
 import { AlbumGrid, AlbumViewModal } from '../teacher/AlbumsPage.jsx';
 import { MedicineCard } from '../teacher/MedicineNotesPage.jsx';
 import { leaveRange } from '../teacher/LeaveRequestsPage.jsx';
 import { LEAVE_STATUS, DAY_LABEL, AGE_GROUP_LABEL } from '../../utils/constants.js';
-import { formatDate, formatWeek, toInputDate } from '../../utils/format.js';
+import { formatDate, formatWeek, toInputDate, formatKg, formatCm, formatNumber } from '../../utils/format.js';
 import dayjs from '../../utils/dayjs.js';
 
 const NoChild = () => <EmptyState icon={Baby} title="Chưa có thông tin bé" />;
@@ -96,26 +96,26 @@ export function ParentGrowthPage() {
   const { data, loading, error, reload } = useFetch(() => healthRecordApi.student(childId), [childId], { enabled: !!childId });
   const [metric, setMetric] = useState('weight');
   if (!child) return <NoChild />;
-  const last = data?.length ? data[data.length - 1] : null;
+  const last = latestRecord(data || []); // cùng lần đo với nhận định dưới biểu đồ
   return (
     <div className="space-y-4">
       <ErrorBanner message={error} onRetry={reload} />
       {last && (
-        <div className="grid grid-cols-3 gap-2">
-          {[['Cân nặng', `${last.weight} kg`], ['Chiều cao', `${last.height} cm`], ['BMI', last.bmi ?? '—']].map(([l, v]) => (
-            <div key={l} className="card p-3 text-center"><p className="text-xs text-ink-soft">{l}</p><p className="font-display text-xl font-bold tabular-nums">{v}</p></div>
+        <div className="grid grid-cols-2 gap-2">
+          {[['Cân nặng', formatKg(last.weight)], ['Chiều cao', formatCm(last.height)]].map(([l, v]) => (
+            <div key={l} className="card p-3 text-center"><p className="text-xs text-ink-soft">{l}</p><p className="font-display text-xl font-bold tabular-nums">{v}</p><p className="text-[11px] text-ink-soft">Đo ngày {formatDate(last.measuredAt)}</p></div>
           ))}
         </div>
       )}
       <section className="card p-4">
         <div className="mb-2 flex items-center justify-between"><h2 className="text-base">Biểu đồ tăng trưởng</h2><Tabs items={[{ value: 'weight', label: 'Cân nặng' }, { value: 'height', label: 'Chiều cao' }]} value={metric} onChange={setMetric} className="border-0" /></div>
-        {loading ? <Skeleton className="h-60" /> : data?.length ? <GrowthChart records={data} dateOfBirth={child.dateOfBirth} gender={child.gender} metric={metric} /> : <p className="py-6 text-center text-sm text-ink-soft">Cô chưa đo lần nào. Dữ liệu sẽ hiện khi lớp cân đo định kỳ.</p>}
+        {loading ? <Skeleton className="h-60" /> : data?.length ? <GrowthChart records={data} dateOfBirth={child.dateOfBirth} gender={child.gender} metric={metric} audience="parent" /> : <p className="py-6 text-center text-sm text-ink-soft">Cô chưa đo lần nào. Dữ liệu sẽ hiện khi lớp cân đo định kỳ.</p>}
       </section>
       {data?.length > 0 && (
         <section className="card overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-paper text-left text-xs text-ink-soft"><tr><th className="px-3 py-2">Ngày đo</th><th className="px-3 py-2 text-right">Cao (cm)</th><th className="px-3 py-2 text-right">Nặng (kg)</th><th className="px-3 py-2 text-right">BMI</th></tr></thead>
-            <tbody className="divide-y divide-line">{[...data].reverse().map((r) => <tr key={r._id}><td className="px-3 py-2 tabular-nums">{formatDate(r.measuredAt)}{r.note && <span className="block text-xs text-ink-soft">{r.note}</span>}</td><td className="px-3 py-2 text-right tabular-nums">{r.height}</td><td className="px-3 py-2 text-right tabular-nums">{r.weight}</td><td className="px-3 py-2 text-right tabular-nums">{r.bmi ?? '—'}</td></tr>)}</tbody>
+            <thead className="bg-paper text-left text-xs text-ink-soft"><tr><th className="px-3 py-2">Ngày đo</th><th className="px-3 py-2 text-right">Cao (cm)</th><th className="px-3 py-2 text-right">Nặng (kg)</th></tr></thead>
+            <tbody className="divide-y divide-line">{[...data].reverse().map((r) => <tr key={r._id}><td className="px-3 py-2 tabular-nums">{formatDate(r.measuredAt)}{r.note && <span className="block text-xs text-ink-soft">{r.note}</span>}</td><td className="px-3 py-2 text-right tabular-nums">{formatNumber(r.height)}</td><td className="px-3 py-2 text-right tabular-nums">{formatNumber(r.weight)}</td></tr>)}</tbody>
           </table>
         </section>
       )}
@@ -152,8 +152,8 @@ function LeaveFormModal({ child, leave, onClose, onSaved }) {
     <Modal open onClose={onClose} size="sm" title={leave ? 'Sửa đơn xin nghỉ' : 'Xin nghỉ cho bé'} description={`${child.fullName} · ${child.class?.name || ''}`} footer={<><Button variant="secondary" onClick={onClose}>Huỷ</Button><Button onClick={submit} loading={loading}>{leave ? 'Lưu đơn' : 'Gửi đơn nghỉ'}</Button></>}>
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
-          <Input label="Từ ngày" type="date" value={fromDate} onChange={(e) => { setFromDate(e.target.value); if (toDate < e.target.value) setToDate(e.target.value); }} />
-          <Input label="Đến ngày" type="date" value={toDate} min={fromDate} onChange={(e) => setToDate(e.target.value)} />
+          <DatePicker label="Từ ngày" value={fromDate} clearable={false} onChange={(v) => { if (!v) return; setFromDate(v); if (toDate < v) setToDate(v); }} />
+          <DatePicker label="Đến ngày" value={toDate} min={fromDate} clearable={false} onChange={(v) => v && setToDate(v)} />
         </div>
         <Textarea label="Lý do" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="vd: Bé bị sốt, gia đình cho nghỉ theo dõi" />
         <p className="text-xs text-ink-soft">Cô sẽ duyệt và ghi "Vắng có phép" cho các ngày này.</p>
@@ -230,8 +230,8 @@ function MedicineFormModal({ child, onClose, onSaved }) {
     <Modal open onClose={onClose} title="Dặn thuốc cho bé" description={`${child.fullName}. Nhớ ghi tên bé lên túi thuốc và gửi cô vào buổi sáng.`} footer={<><Button variant="secondary" onClick={onClose}>Huỷ</Button><Button onClick={submit} loading={loading}>Gửi dặn thuốc</Button></>}>
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
-          <Input label="Từ ngày" type="date" value={fromDate} onChange={(e) => { setFromDate(e.target.value); if (toDate < e.target.value) setToDate(e.target.value); }} />
-          <Input label="Đến ngày" type="date" value={toDate} min={fromDate} onChange={(e) => setToDate(e.target.value)} />
+          <DatePicker label="Từ ngày" value={fromDate} clearable={false} onChange={(v) => { if (!v) return; setFromDate(v); if (toDate < v) setToDate(v); }} />
+          <DatePicker label="Đến ngày" value={toDate} min={fromDate} clearable={false} onChange={(v) => v && setToDate(v)} />
         </div>
         {meds.map((m, i) => (
           <fieldset key={i} className="relative rounded-card border border-line p-3">

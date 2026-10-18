@@ -3,7 +3,7 @@ import clsx from 'clsx';
 // Tabs ngang gạch chân leaf. items: [{ value, label, count? }]
 export function Tabs({ items, value, onChange, className }) {
   return (
-    <div role="tablist" className={clsx('flex gap-1 overflow-x-auto border-b border-line', className)}>
+    <div role="tablist" className={clsx('flex gap-1 overflow-x-auto overflow-y-hidden border-b border-line [scrollbar-width:none] [&::-webkit-scrollbar]:hidden', className)}>
       {items.map((it) => {
         const active = it.value === value;
         return (

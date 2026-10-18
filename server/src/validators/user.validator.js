@@ -5,6 +5,7 @@ import { objectId, phone, password, boolStr, paginationQuery, assetUrl } from '.
 export const listUsersSchema = {
   query: paginationQuery.extend({
     role: z.enum(ROLE_LIST).optional(),
+    honorific: z.enum(['co', 'thay']).optional(),
     isActive: boolStr,
   }),
 };
@@ -16,6 +17,7 @@ export const createUserSchema = {
     phone: phone.optional(),
     password: password.optional(), // bỏ trống → server sinh mật khẩu tạm
     role: z.enum(ROLE_LIST),
+    honorific: z.enum(['co', 'thay']).optional(),
   }),
 };
 
@@ -27,6 +29,7 @@ export const updateUserSchema = {
       email: z.string().trim().toLowerCase().email().optional(),
       phone: phone.nullable().optional(),
       role: z.enum(ROLE_LIST).optional(),
+      honorific: z.enum(['co', 'thay']).optional(),
       avatar: assetUrl.optional(),
     })
     .strict(),

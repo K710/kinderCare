@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useBlocker } from 'react-router-dom';
 import clsx from 'clsx';
 import { Check, Clock, FileCheck, UserX, CircleDashed, Save, MoreHorizontal } from 'lucide-react';
 import { attendanceApi } from '../../api/attendance.api.js';
@@ -6,7 +7,7 @@ import { errorMessage } from '../../api/axios.js';
 import { useFetch } from '../../hooks/useFetch.js';
 import { useMyClasses } from '../../hooks/useMyClasses.js';
 import { toast } from '../../stores/toast.store.js';
-import { Avatar, Button, Input, Textarea, Modal, Skeleton, EmptyState, Chip } from '../../components/ui/index.js';
+import { Avatar, Button, Input, Textarea, Modal, Skeleton, EmptyState, Chip, DatePicker, ConfirmDialog } from '../../components/ui/index.js';
 import { ClassSelect } from '../../components/shared/ClassSelect.jsx';
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
 import { PageHeader } from '../../components/layout/PageHeader.jsx';
@@ -122,6 +123,15 @@ export default function AttendancePage() {
     setDirty(true);
   };
 
+  // Rời trang khi chưa lưu: chặn điều hướng trong app + cảnh báo khi đóng tab
+  const blocker = useBlocker(dirty);
+  useEffect(() => {
+    if (!dirty) return;
+    const onUnload = (e) => { e.preventDefault(); e.returnValue = ''; };
+    window.addEventListener('beforeunload', onUnload);
+    return () => window.removeEventListener('beforeunload', onUnload);
+  }, [dirty]);
+
   const marked = items.filter((it) => it.status).length;
   const counts = ORDER.reduce((acc, st) => ({ ...acc, [st]: items.filter((it) => it.status === st).length }), {});
   const isFuture = date > toInputDate(new Date());
@@ -150,7 +160,7 @@ export default function AttendancePage() {
         actions={
           <>
             <ClassSelect classes={classes} value={selectedId} onChange={select} />
-            <Input type="date" value={date} max={toInputDate(new Date())} onChange={(e) => setDate(e.target.value)} aria-label="Ngày điểm danh" className="w-40" />
+            <DatePicker value={date} max={toInputDate(new Date())} clearable={false} onChange={(v) => v && setDate(v)} aria-label="Ngày điểm danh" className="w-44" />
           </>
         }
       />
@@ -186,6 +196,15 @@ export default function AttendancePage() {
         </div>
       </div>
 
+      <ConfirmDialog
+        open={blocker.state === 'blocked'}
+        onClose={() => blocker.reset?.()}
+        danger
+        title="Rời trang điểm danh?"
+        confirmLabel="Rời trang, bỏ thay đổi"
+        message="Điểm danh hôm nay chưa được lưu. Rời trang sẽ mất các thay đổi vừa đánh dấu."
+        onConfirm={() => blocker.proceed?.()}
+      />
       {sheet && <StatusSheet item={items.find((x) => x.student._id === sheet.student._id)} onClose={() => setSheet(null)} onPick={(st, note) => { setOne(sheet.student._id, { status: st, note }); setSheet(null); }} />}
     </div>
   );

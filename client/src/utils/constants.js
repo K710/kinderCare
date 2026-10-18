@@ -8,6 +8,8 @@ export const ROLE_LABEL = {
   parent: 'Phụ huynh',
 };
 
+export const HONORIFIC_LABEL = { co: 'Cô', thay: 'Thầy' };
+
 export const ROLE_HOME = { admin: '/admin', principal: '/principal', teacher: '/teacher', parent: '/parent' };
 
 export const AGE_GROUP_LABEL = { nha_tre: 'Nhà trẻ', mam: 'Mầm', choi: 'Chồi', la: 'Lá', all: 'Tất cả' };

@@ -133,6 +133,12 @@
 - [Bảo mật – đã duyệt] Lưu trữ ảnh/tệp qua storage driver chung (`STORAGE_DRIVER=local|cloudinary`, services/storage.js). DB chỉ lưu `asset://<driver>/<key>`, không lưu URL công khai. Mọi response (`sendSuccess`, socket emit) đổi ref → link có chữ ký HMAC `/api/v1/files/<driver>/<key>?exp&sig` sống `FILE_URL_TTL_HOURS` (mặc định 3 giờ); link chỉ xuất hiện trong response của người đã qua checkOwnership nên PH/GV lớp khác không có link. Client gửi lại link ký → validator `assetUrl` quy về ref.
 - [Bảo mật – đã duyệt] local: file trong `UPLOAD_DIR` (mặc định server/uploads, gitignore), chỉ phục vụ qua route `/files` kiểm chữ ký + hạn, chặn `..`; không static public. cloudinary: upload `type=authenticated`, route `/files` chuyển hướng sang `private_download_url` hết hạn sau 1 giờ do server ký. `/files` không tính vào global rate-limit.
 - [Bảo mật – đã duyệt] Upload chỉ nhận jpg/png/webp/heic(heif) (+pdf cho tệp chat), ≤ 10MB/ảnh (multer); client nén về cạnh dài 1600px JPEG 0.85 (utils/image.js, HEIC gửi nguyên) trước khi gửi.
+- GrowthChart: thêm WHO Growth Reference 2007 (cân nặng 61–120 tháng, chiều cao 61–228 tháng) nối tiếp WHO 2006; `latestRecord()` dùng chung cho ô số liệu và nhận định; PH xem lời thường ("nằm trong khoảng phổ biến của trẻ cùng tuổi"), SD/z ở ghi chú nhỏ, không hiện BMI; GV/HT thấy z-score.
+- DatePicker (components/ui) dd/mm/yyyy, value ISO, có min/max, thay toàn bộ `input type=date`; số thập phân qua `formatNumber` (dấu phẩy).
+- User.honorific `co|thay` cho GV (admin đặt khi tạo/sửa); client `teacherShort/teacherFull` → "Lời nhắn của cô Lan".
+- Dashboard HT: ô "Chờ duyệt" chỉ gồm thực đơn + kế hoạch; đơn nghỉ/dặn thuốc sang mục "Theo dõi".
+- [Thanh toán – đã duyệt] Gán tay ở đối soát: gợi ý bé theo tên trong nội dung CK (so khớp không dấu, tên ở nhà hoặc ≥1 từ dài ≥4 ký tự / ≥2 từ trong họ tên); cảnh báo khi học phí được chọn đã đóng đủ (vẫn cho gán, ghi chú thanh toán thừa).
+- Điểm danh: chặn điều hướng (useBlocker) + beforeunload khi chưa lưu; DatePicker max = hôm nay.
 - Token thêm `role.principal.soft/dark` (#EFEBFE/#5A3FD0) cho chip Hiệu trưởng theo phản hồi UI; Chip có tone `principal`.
 
 ## Nhật ký
@@ -171,6 +177,7 @@
 - 2026-10-18 | 5.4 | StaffLayout (Sidebar/Header/UserMenu/Bell), ParentLayout (ChildSwitcher/MobileNav), UI: Button/Input/Avatar/Chip/Skeleton/EmptyState/Toast; build OK
 - 2026-10-18 | 6.1 | Admin: Tổng quan, Tài khoản (CRUD/khoá/reset MK), Năm học, Nhật ký; UI: Modal/ConfirmDialog/Select/Textarea/DataTable/StatTile/Tabs/SearchInput; hooks useFetch/usePagination
 - 2026-10-18 | 6.1 | Sửa logic: self-lock/role, LAST_ADMIN, xoá năm học có dữ liệu, mustChangePassword + mật khẩu tạm 1 lần, chính sách MK production; 5 test mới
+- 2026-10-18 | 6.x | Phản hồi cuối GĐ6: WHO 2007, DatePicker dd/mm/yyyy, số thập phân, danh xưng GV, dashboard HT Chờ duyệt/Theo dõi, đối soát gợi ý bé, điểm danh chặn rời trang
 - 2026-10-18 | 7.x | Storage driver local/cloudinary + link ảnh có chữ ký; client nén ảnh; test upload/quyền xem ảnh (5 test mới, 111 pass)
 - 2026-10-18 | 6.4 | Phản hồi UI PH: học phí gộp mọi bé theo tên, mốc tâm trạng → chip, tên ở nhà ở header, formatSleep chung, "Cô/Thầy … nhắn", chat hiện lớp·bé, trang thanh toán (tên bé, lưu ý inline, copy số, hết 15 phút dừng poll)
 - 2026-10-18 | 6.4 | Trang Hôm nay PH: T7/CN hoặc chưa có dữ liệu → "Hôm nay bé nghỉ học" + liên kết ngày học gần nhất (Lịch nhận ?day=)

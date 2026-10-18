@@ -7,7 +7,7 @@ import { parsePagination, buildPagination } from '../utils/paginate.js';
 import { escapeRegex } from '../validators/common.validator.js';
 import { ROLES } from '../config/constants.js';
 
-const TEACHER_FIELDS = 'fullName email phone avatar';
+const TEACHER_FIELDS = 'fullName email phone avatar honorific';
 
 async function assertTeachers(ids = []) {
   if (!ids.length) return;

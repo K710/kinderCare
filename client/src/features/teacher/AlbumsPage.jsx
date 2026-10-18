@@ -7,7 +7,7 @@ import { useMyClasses } from '../../hooks/useMyClasses.js';
 import { usePagination } from '../../hooks/usePagination.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { toast } from '../../stores/toast.store.js';
-import { Button, Input, Textarea, Modal, Skeleton, EmptyState, ConfirmDialog, Pagination, IconButton } from '../../components/ui/index.js';
+import { Button, Input, Textarea, Modal, Skeleton, EmptyState, ConfirmDialog, Pagination, IconButton, DatePicker } from '../../components/ui/index.js';
 import { ClassSelect } from '../../components/shared/ClassSelect.jsx';
 import { FormError } from '../../components/shared/FormError.jsx';
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
@@ -81,7 +81,7 @@ function CreateAlbumModal({ open, onClose, classId, onDone }) {
       <div className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-[1fr_160px]">
           <Input label="Tiêu đề" placeholder="vd: Hoạt động ngoài trời" value={title} onChange={(e) => setTitle(e.target.value)} />
-          <Input label="Ngày hoạt động" type="date" value={date} max={toInputDate(new Date())} onChange={(e) => setDate(e.target.value)} />
+          <DatePicker label="Ngày hoạt động" value={date} max={toInputDate(new Date())} clearable={false} onChange={(v) => v && setDate(v)} />
         </div>
         <Textarea label="Mô tả" rows={2} placeholder="Không bắt buộc" value={description} onChange={(e) => setDescription(e.target.value)} />
         <FilePicker files={files} setFiles={setFiles} />

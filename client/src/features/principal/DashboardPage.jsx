@@ -21,7 +21,8 @@ export default function PrincipalDashboardPage() {
   const att = data?.attendanceToday;
   const pct = att?.total ? Math.round(((att.present + att.late) / att.total) * 100) : 0;
   const pending = data?.pending || {};
-  const pendingTotal = (pending.menus || 0) + (pending.lessonPlans || 0) + (pending.leaveRequests || 0) + (pending.medicineNotes || 0);
+  // Chờ duyệt = việc của HT (thực đơn, kế hoạch). Đơn nghỉ / dặn thuốc do GV xử lý → mục Theo dõi
+  const pendingTotal = (pending.menus || 0) + (pending.lessonPlans || 0);
   const tuition = data?.tuitionThisMonth;
 
   return (
@@ -50,6 +51,11 @@ export default function PrincipalDashboardPage() {
           <ul className="mt-3 divide-y divide-line">
             <PendingRow to={`${PATHS.principal.menus}?status=pending`} icon={UtensilsCrossed} label="Thực đơn chờ duyệt" count={pending.menus} loading={loading} />
             <PendingRow to={`${PATHS.principal.lessonPlans}?status=pending`} icon={BookOpen} label="Kế hoạch giảng dạy chờ duyệt" count={pending.lessonPlans} loading={loading} />
+          </ul>
+
+          <h3 className="mt-5 text-base">Theo dõi</h3>
+          <p className="text-xs text-ink-soft">Giáo viên xử lý, hiệu trưởng chỉ theo dõi.</p>
+          <ul className="mt-1 divide-y divide-line">
             <PendingRow icon={FileText} label="Đơn xin nghỉ chờ cô duyệt" count={pending.leaveRequests} loading={loading} />
             <PendingRow icon={Pill} label="Dặn thuốc chờ cô xác nhận" count={pending.medicineNotes} loading={loading} />
           </ul>

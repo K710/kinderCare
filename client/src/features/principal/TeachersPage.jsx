@@ -6,7 +6,7 @@ import { SearchInput, DataTable, Chip, Avatar } from '../../components/ui/index.
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
 import { PageHeader } from '../../components/layout/PageHeader.jsx';
 import { PATHS } from '../../router/paths.js';
-import { fromNow, formatDateTime } from '../../utils/format.js';
+import { fromNow, formatDateTime, teacherFull } from '../../utils/format.js';
 
 // Danh sách giáo viên + lớp phụ trách (tài khoản do quản trị viên quản lý)
 export default function TeachersPage() {
@@ -37,7 +37,7 @@ export default function TeachersPage() {
               <div className="flex items-center gap-3">
                 <Avatar src={t.avatar} name={t.fullName} role="teacher" size="sm" />
                 <div className="min-w-0">
-                  <p className="truncate font-medium">{t.fullName}</p>
+                  <p className="truncate font-medium">{t.honorific ? teacherFull(t) : t.fullName}</p>
                   <p className="truncate text-xs text-ink-soft">{t.email}</p>
                 </div>
               </div>

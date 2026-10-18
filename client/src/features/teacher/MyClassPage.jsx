@@ -7,11 +7,11 @@ import { useFetch } from '../../hooks/useFetch.js';
 import { useMyClasses } from '../../hooks/useMyClasses.js';
 import { Avatar, Chip, Modal, Button, Skeleton, EmptyState, Tabs } from '../../components/ui/index.js';
 import { ClassSelect } from '../../components/shared/ClassSelect.jsx';
-import { GrowthChart } from '../../components/shared/GrowthChart.jsx';
+import { GrowthChart, latestRecord } from '../../components/shared/GrowthChart.jsx';
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
 import { PageHeader } from '../../components/layout/PageHeader.jsx';
 import { GENDER_LABEL, AGE_GROUP_LABEL } from '../../utils/constants.js';
-import { formatDate, formatAge } from '../../utils/format.js';
+import { formatDate, formatAge, formatKg, formatCm } from '../../utils/format.js';
 
 /* ---------- Hồ sơ bé (GV lớp thấy dị ứng / lưu ý sức khoẻ) ---------- */
 export function StudentProfileModal({ studentId, onClose }) {
@@ -19,7 +19,7 @@ export function StudentProfileModal({ studentId, onClose }) {
   const { data: health } = useFetch(() => healthRecordApi.student(studentId), [studentId], { enabled: !!studentId });
   const [metric, setMetric] = useState('weight');
   if (!studentId) return null;
-  const last = health?.length ? health[health.length - 1] : null;
+  const last = latestRecord(health || []);
   return (
     <Modal open onClose={onClose} size="lg" title={s?.fullName || 'Hồ sơ bé'} description={s ? `${GENDER_LABEL[s.gender]} · ${formatAge(s.dateOfBirth)} · ${s.class?.name || 'Chưa xếp lớp'}` : ''} footer={<Button variant="secondary" onClick={onClose}>Đóng</Button>}>
       {loading || !s ? (
@@ -32,7 +32,7 @@ export function StudentProfileModal({ studentId, onClose }) {
               <dt className="text-ink-soft">Tên ở nhà</dt><dd>{s.nickname || '—'}</dd>
               <dt className="text-ink-soft">Ngày sinh</dt><dd className="tabular-nums">{formatDate(s.dateOfBirth)}</dd>
               <dt className="text-ink-soft">Nhập học</dt><dd className="tabular-nums">{s.enrollDate ? formatDate(s.enrollDate) : '—'}</dd>
-              <dt className="text-ink-soft">Lần đo gần nhất</dt><dd className="tabular-nums">{last ? `${last.height} cm · ${last.weight} kg` : '—'}</dd>
+              <dt className="text-ink-soft">Lần đo gần nhất</dt><dd className="tabular-nums">{last ? `${formatCm(last.height)} · ${formatKg(last.weight)} · ${formatDate(last.measuredAt)}` : '—'}</dd>
             </dl>
           </div>
 

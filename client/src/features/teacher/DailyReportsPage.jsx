@@ -7,7 +7,7 @@ import { errorMessage } from '../../api/axios.js';
 import { useFetch } from '../../hooks/useFetch.js';
 import { useMyClasses } from '../../hooks/useMyClasses.js';
 import { toast } from '../../stores/toast.store.js';
-import { Avatar, Button, Input, Textarea, Modal, Skeleton, EmptyState, Chip, ConfirmDialog, IconButton } from '../../components/ui/index.js';
+import { Avatar, Button, Input, Textarea, Modal, Skeleton, EmptyState, Chip, ConfirmDialog, IconButton, DatePicker } from '../../components/ui/index.js';
 import { ClassSelect } from '../../components/shared/ClassSelect.jsx';
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
 import { PageHeader } from '../../components/layout/PageHeader.jsx';
@@ -165,7 +165,7 @@ export default function DailyReportsPage() {
         actions={
           <>
             <ClassSelect classes={classes} value={selectedId} onChange={select} />
-            <Input type="date" value={date} max={toInputDate(new Date())} onChange={(e) => setDate(e.target.value)} aria-label="Ngày" className="w-40" />
+            <DatePicker value={date} max={toInputDate(new Date())} clearable={false} onChange={(v) => v && setDate(v)} aria-label="Ngày" className="w-44" />
           </>
         }
       />

@@ -14,7 +14,7 @@ import { RoleChip } from '../../components/shared/RoleChip.jsx';
 import { TempPasswordModal } from '../../components/shared/TempPasswordModal.jsx';
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
 import { PageHeader } from '../../components/layout/PageHeader.jsx';
-import { ROLE_LABEL } from '../../utils/constants.js';
+import { ROLE_LABEL, HONORIFIC_LABEL } from '../../utils/constants.js';
 import { fromNow, formatDateTime } from '../../utils/format.js';
 
 const ROLE_OPTIONS = Object.entries(ROLE_LABEL).map(([value, label]) => ({ value, label }));
@@ -25,6 +25,7 @@ const baseSchema = {
   email: z.string().trim().toLowerCase().email('Email chưa đúng định dạng.'),
   phone: z.union([phoneRule, z.literal('')]),
   role: z.enum(['admin', 'principal', 'teacher', 'parent'], { message: 'Chọn vai trò.' }),
+  honorific: z.enum(['co', 'thay', '']).optional(),
 };
 const createSchema = z.object(baseSchema); // mật khẩu tạm do server sinh, hiện 1 lần
 const editSchema = z.object(baseSchema);
@@ -32,12 +33,13 @@ const editSchema = z.object(baseSchema);
 /* ---------- Modal tạo / sửa ---------- */
 function UserFormModal({ open, onClose, user, onSaved, isSelf }) {
   const isEdit = !!user;
-  const { register, handleSubmit, formState, reset } = useForm({
+  const { register, handleSubmit, formState, reset, watch } = useForm({
     resolver: zodResolver(isEdit ? editSchema : createSchema),
     values: user
-      ? { fullName: user.fullName, email: user.email, phone: user.phone || '', role: user.role }
-      : { fullName: '', email: '', phone: '', role: '' }, // bắt buộc chọn vai trò
+      ? { fullName: user.fullName, email: user.email, phone: user.phone || '', role: user.role, honorific: user.honorific || '' }
+      : { fullName: '', email: '', phone: '', role: '', honorific: '' }, // bắt buộc chọn vai trò
   });
+  const roleValue = watch('role');
   const [serverError, setServerError] = useState('');
 
   const submit = async (values) => {
@@ -46,6 +48,7 @@ function UserFormModal({ open, onClose, user, onSaved, isSelf }) {
     if (!payload.phone) delete payload.phone;
     else if (isEdit) payload.phone = values.phone;
     if (isSelf) delete payload.role; // không tự đổi vai trò
+    if (values.role !== 'teacher' || !payload.honorific) delete payload.honorific; // danh xưng chỉ cho GV
     try {
       const saved = isEdit ? await userApi.update(user._id, payload) : await userApi.create(payload);
       toast.success(isEdit ? 'Đã lưu thay đổi' : 'Đã tạo tài khoản');
@@ -87,6 +90,9 @@ function UserFormModal({ open, onClose, user, onSaved, isSelf }) {
           error={formState.errors.role?.message}
           {...register('role')}
         />
+        {roleValue === 'teacher' && (
+          <Select label="Danh xưng" options={Object.entries(HONORIFIC_LABEL).map(([value, label]) => ({ value, label }))} placeholder="Chọn cô / thầy" hint="Hiện trong lời nhắn gửi phụ huynh, vd: Lời nhắn của cô Lan" error={formState.errors.honorific?.message} {...register('honorific')} />
+        )}
         {serverError && (
           <p role="alert" className="rounded-btn bg-berry-soft px-3 py-2 text-sm text-berry">
             {serverError}

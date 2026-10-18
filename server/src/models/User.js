@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema(
     phone: { type: String, trim: true },
     password: { type: String, required: true, select: false },
     role: { type: String, enum: ROLE_LIST, required: true },
+    honorific: { type: String, enum: ['co', 'thay', ''], default: '' }, // danh xưng GV: cô / thầy
     avatar: { type: String, default: '' },
     avatarPublicId: { type: String, default: '' },
     isActive: { type: Boolean, default: true },

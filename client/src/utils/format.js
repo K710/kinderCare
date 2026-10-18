@@ -45,6 +45,16 @@ export function formatSleep(sleep) {
 // Tên gọi của bé: tên ở nhà nếu có, không thì tên đầy đủ
 export const childName = (c) => c?.nickname || c?.fullName || '';
 
+// Số thập phân kiểu Việt: 18.9 → "18,9"; formatKg(18.9) → "18,9 kg"
+export const formatNumber = (n, digits = 1) => (n == null || Number.isNaN(Number(n)) ? '—' : Number(n).toLocaleString('vi-VN', { maximumFractionDigits: digits, minimumFractionDigits: 0 }));
+export const formatKg = (n) => (n == null ? '—' : `${formatNumber(n, 1)} kg`);
+export const formatCm = (n) => (n == null ? '—' : `${formatNumber(n, 1)} cm`);
+
+// Danh xưng giáo viên: "cô Lan" (danh xưng + tên gọi) / "Cô Nguyễn Thị Lan"
+const HONORIFIC = { co: 'cô', thay: 'thầy' };
+export const teacherShort = (u) => (u ? `${HONORIFIC[u.honorific] || 'cô/thầy'} ${String(u.fullName || '').trim().split(/\s+/).pop()}` : '');
+export const teacherFull = (u) => (u ? `${(HONORIFIC[u.honorific] || 'Cô/Thầy').replace(/^./, (c) => c.toUpperCase())} ${u.fullName}` : '');
+
 // Tuổi: "3 tuổi 4 tháng"
 export function formatAge(dob) {
   const months = dayjs().diff(dayjs(dob), 'month');

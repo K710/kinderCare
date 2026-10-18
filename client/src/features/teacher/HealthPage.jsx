@@ -6,11 +6,11 @@ import { errorMessage } from '../../api/axios.js';
 import { useFetch } from '../../hooks/useFetch.js';
 import { useMyClasses } from '../../hooks/useMyClasses.js';
 import { toast } from '../../stores/toast.store.js';
-import { Avatar, Button, Input, Skeleton, EmptyState, IconButton } from '../../components/ui/index.js';
+import { Avatar, Button, Input, Skeleton, EmptyState, IconButton, DatePicker } from '../../components/ui/index.js';
 import { ClassSelect } from '../../components/shared/ClassSelect.jsx';
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
 import { PageHeader } from '../../components/layout/PageHeader.jsx';
-import { formatDateFull, formatAge, toInputDate } from '../../utils/format.js';
+import { formatDateFull, formatAge, toInputDate, formatNumber } from '../../utils/format.js';
 import { StudentProfileModal } from './MyClassPage.jsx';
 
 const bmi = (h, w) => (h && w ? +(w / (h / 100) ** 2).toFixed(1) : null);
@@ -56,7 +56,7 @@ export default function HealthPage() {
     <div className="pb-24">
       <PageHeader
         description={`Ngày đo: ${formatDateFull(date)}. Bỏ trống bé không đo hôm nay.`}
-        actions={<><ClassSelect classes={classes} value={selectedId} onChange={select} /><Input type="date" value={date} max={toInputDate(new Date())} onChange={(e) => setDate(e.target.value)} aria-label="Ngày đo" className="w-40" /></>}
+        actions={<><ClassSelect classes={classes} value={selectedId} onChange={select} /><DatePicker value={date} max={toInputDate(new Date())} clearable={false} onChange={(v) => v && setDate(v)} aria-label="Ngày đo" className="w-44" /></>}
       />
       <ErrorBanner message={error} onRetry={reload} className="mb-4" />
       {loading ? (
@@ -75,7 +75,7 @@ export default function HealthPage() {
                 <IconButton label="Xem biểu đồ tăng trưởng" icon={LineChart} size="sm" onClick={() => setProfile(s._id)} className="md:order-last" />
                 <Input type="number" inputMode="decimal" step="0.1" min={30} max={200} placeholder="cm" value={r.height || ''} onChange={(e) => set(s._id, { height: e.target.value })} aria-label={`Chiều cao ${s.fullName}`} />
                 <Input type="number" inputMode="decimal" step="0.1" min={1} max={100} placeholder="kg" value={r.weight || ''} onChange={(e) => set(s._id, { weight: e.target.value })} aria-label={`Cân nặng ${s.fullName}`} />
-                <span className="text-sm tabular-nums text-ink-soft">{b ? `BMI ${b}` : ''}</span>
+                <span className="text-sm tabular-nums text-ink-soft">{b ? `BMI ${formatNumber(b)}` : ''}</span>
                 <Input placeholder="Ghi chú" value={r.note || ''} onChange={(e) => set(s._id, { note: e.target.value })} aria-label={`Ghi chú ${s.fullName}`} className="col-span-2 md:col-span-1" />
               </li>
             );

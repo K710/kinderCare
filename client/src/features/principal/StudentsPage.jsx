@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Plus, Pencil, ArrowLeftRight, Phone } from 'lucide-react';
@@ -10,7 +10,7 @@ import { errorMessage } from '../../api/axios.js';
 import { useFetch, useDebounce } from '../../hooks/useFetch.js';
 import { usePagination } from '../../hooks/usePagination.js';
 import { toast } from '../../stores/toast.store.js';
-import { Button, Input, Select, Textarea, SearchInput, DataTable, StatusChip, Modal, Avatar } from '../../components/ui/index.js';
+import { Button, Input, Select, Textarea, SearchInput, DataTable, StatusChip, Modal, Avatar, DatePicker } from '../../components/ui/index.js';
 import { EntityPicker } from '../../components/shared/EntityPicker.jsx';
 import { FormError } from '../../components/shared/FormError.jsx';
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
@@ -42,7 +42,7 @@ function StudentFormModal({ open, onClose, student, classes = [], onSaved }) {
   const [parents, setParents] = useState(student?.parents || []);
   const [parentsErr, setParentsErr] = useState('');
   const [serverError, setServerError] = useState('');
-  const { register, handleSubmit, formState, reset } = useForm({
+  const { register, handleSubmit, formState, reset, control } = useForm({
     resolver: zodResolver(schema),
     values: student
       ? {
@@ -111,10 +111,10 @@ function StudentFormModal({ open, onClose, student, classes = [], onSaved }) {
         <div className="grid gap-3 sm:grid-cols-2">
           <Input label="Họ và tên" error={formState.errors.fullName?.message} {...register('fullName')} />
           <Input label="Tên ở nhà" placeholder="Không bắt buộc" error={formState.errors.nickname?.message} {...register('nickname')} />
-          <Input label="Ngày sinh" type="date" max={todayStr()} error={formState.errors.dateOfBirth?.message} {...register('dateOfBirth')} />
+          <Controller name="dateOfBirth" control={control} render={({ field }) => <DatePicker label="Ngày sinh" value={field.value} onChange={field.onChange} max={todayStr()} error={formState.errors.dateOfBirth?.message} />} />
           <Select label="Giới tính" options={GENDER_OPTIONS} placeholder="Chọn giới tính" error={formState.errors.gender?.message} {...register('gender')} />
           <Select label="Lớp" options={classes.map((c) => ({ value: c._id, label: c.name }))} placeholder="Chưa xếp lớp" error={formState.errors.class?.message} {...register('class')} />
-          <Input label="Ngày nhập học" type="date" error={formState.errors.enrollDate?.message} {...register('enrollDate')} />
+          <Controller name="enrollDate" control={control} render={({ field }) => <DatePicker label="Ngày nhập học" value={field.value} onChange={field.onChange} error={formState.errors.enrollDate?.message} />} />
         </div>
 
         <EntityPicker

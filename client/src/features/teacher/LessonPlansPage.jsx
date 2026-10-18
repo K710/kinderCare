@@ -6,7 +6,7 @@ import { useFetch } from '../../hooks/useFetch.js';
 import { useMyClasses } from '../../hooks/useMyClasses.js';
 import { usePagination } from '../../hooks/usePagination.js';
 import { toast } from '../../stores/toast.store.js';
-import { Button, Input, Textarea, Modal, DataTable, StatusChip, ConfirmDialog, Tabs, EmptyState, IconButton } from '../../components/ui/index.js';
+import { Button, Input, Textarea, Modal, DataTable, StatusChip, ConfirmDialog, Tabs, EmptyState, IconButton, DatePicker } from '../../components/ui/index.js';
 import { ClassSelect } from '../../components/shared/ClassSelect.jsx';
 import { FormError } from '../../components/shared/FormError.jsx';
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
@@ -55,7 +55,7 @@ function PlanEditorModal({ plan, classId, onClose, onSaved }) {
   return (
     <Modal open onClose={onClose} size="xl" title={isEdit ? 'Sửa kế hoạch' : 'Soạn kế hoạch tuần'} description="Lưu nháp để sửa tiếp, hoặc gửi hiệu trưởng duyệt." footer={<><Button variant="secondary" onClick={onClose}>Huỷ</Button><Button variant="secondary" onClick={() => submit(false)} loading={loading}>Lưu nháp</Button><Button icon={Send} onClick={() => submit(true)} loading={loading}>Lưu và gửi duyệt</Button></>}>
       <div className="mb-4 grid gap-3 sm:grid-cols-[180px_1fr]">
-        <Input label="Tuần" type="date" value={weekStart} disabled={isEdit} onChange={(e) => setWeekStart(toMonday(e.target.value))} hint={formatWeek(weekStart)} />
+        <DatePicker label="Tuần" value={weekStart} disabled={isEdit} clearable={false} onChange={(v) => v && setWeekStart(toMonday(v))} hint={formatWeek(weekStart)} />
         <Input label="Chủ đề tuần" placeholder="vd: Thế giới động vật" value={theme} onChange={(e) => setTheme(e.target.value)} />
       </div>
       <div className="space-y-3">

@@ -6,7 +6,7 @@ import { errorMessage } from '../../api/axios.js';
 import { useFetch } from '../../hooks/useFetch.js';
 import { usePagination } from '../../hooks/usePagination.js';
 import { toast } from '../../stores/toast.store.js';
-import { Button, Input, Select, Textarea, DataTable, StatusChip, Chip, Modal, ConfirmDialog, Tabs } from '../../components/ui/index.js';
+import { Button, Input, Select, Textarea, DataTable, StatusChip, Chip, Modal, ConfirmDialog, Tabs, DatePicker } from '../../components/ui/index.js';
 import { FormError } from '../../components/shared/FormError.jsx';
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
 import { PageHeader } from '../../components/layout/PageHeader.jsx';
@@ -82,7 +82,7 @@ function MenuEditorModal({ open, onClose, menu, onSaved }) {
       }
     >
       <div className="mb-4 grid grid-cols-2 gap-3">
-        <Input label="Tuần (chọn ngày bất kỳ)" type="date" value={weekStart} disabled={isEdit} onChange={(e) => setWeekStart(toMonday(e.target.value))} hint={formatWeek(weekStart)} />
+        <DatePicker label="Tuần (chọn ngày bất kỳ)" value={weekStart} disabled={isEdit} clearable={false} onChange={(v) => v && setWeekStart(toMonday(v))} hint={formatWeek(weekStart)} />
         <Select label="Áp dụng cho" options={AGE_OPTIONS} value={ageGroup} onChange={(e) => setAgeGroup(e.target.value)} />
       </div>
       <div className="space-y-3">

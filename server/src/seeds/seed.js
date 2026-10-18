@@ -53,8 +53,8 @@ async function main() {
   const [admin, ht, gv1, gv2, ph1, ph2, ph3, ...phExtra] = await User.create([
     mk('admin', 'admin@kindercare.vn', 'Quản trị viên', '0900000001'),
     mk('principal', 'ht@kindercare.vn', 'Phạm Thị Hồng', '0900000002'),
-    mk('teacher', 'gv1@kindercare.vn', 'Nguyễn Thị Lan', '0900000003'),
-    mk('teacher', 'gv2@kindercare.vn', 'Trần Thu Hà', '0900000004'),
+    { ...mk('teacher', 'gv1@kindercare.vn', 'Nguyễn Thị Lan', '0900000003'), honorific: 'co' },
+    { ...mk('teacher', 'gv2@kindercare.vn', 'Trần Thu Hà', '0900000004'), honorific: 'co' },
     mk('parent', 'ph1@kindercare.vn', 'Lê Văn Minh', '0900000005'),
     mk('parent', 'ph2@kindercare.vn', 'Hoàng Thị Mai', '0900000006'),
     mk('parent', 'ph3@kindercare.vn', 'Vũ Đức Anh', '0900000007'),

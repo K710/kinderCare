@@ -1,6 +1,7 @@
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import dayjs from '../../utils/dayjs.js';
 import { Skeleton } from '../ui/Skeleton.jsx';
+import { formatNumber } from '../../utils/format.js';
 
 // Màu theo DESIGN.md: có mặt leaf, đi muộn sky, vắng có phép sun, vắng không phép peach
 const SERIES = [
@@ -22,7 +23,7 @@ function Tip({ active, payload }) {
           {s.name}: {d[s.key]}
         </p>
       ))}
-      {d.rate != null && <p className="mt-1 text-ink-soft">Chuyên cần {d.rate}%</p>}
+      {d.rate != null && <p className="mt-1 text-ink-soft">Chuyên cần {formatNumber(d.rate)}%</p>}
     </div>
   );
 }

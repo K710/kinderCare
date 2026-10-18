@@ -9,7 +9,7 @@ import { dailyReportApi } from '../../api/dailyReport.api.js';
 import { Chip, Skeleton, EmptyState, IconButton, StatusChip } from '../../components/ui/index.js';
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
 import { ATTENDANCE_STATUS, MEAL_LABEL, MOOD_LABEL } from '../../utils/constants.js';
-import { formatDateFull, formatSleep } from '../../utils/format.js';
+import { formatDateFull, formatSleep, teacherShort } from '../../utils/format.js';
 import dayjs from '../../utils/dayjs.js';
 
 const DOT = { present: 'bg-leaf', late: 'bg-sky', excused: 'bg-sun', absent: 'bg-peach' };
@@ -115,7 +115,7 @@ export default function CalendarPage() {
                 {rep.photos.map((u) => <a key={u} href={u} target="_blank" rel="noreferrer"><img src={u} alt="" className="h-20 w-20 shrink-0 rounded-photo object-cover" loading="lazy" /></a>)}
               </div>
             )}
-            {rep.teacher && <p className="text-xs text-ink-soft">Cô/Thầy {rep.teacher.fullName} nhắn</p>}
+            {rep.teacher && <p className="text-xs text-ink-soft">Lời nhắn của {teacherShort(rep.teacher)}</p>}
           </div>
         ) : (
           <p className="mt-3 text-sm text-ink-soft">Không có nhận xét ngày này.</p>

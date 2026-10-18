@@ -7,7 +7,7 @@ import { ApiError } from '../utils/ApiError.js';
 import { ROLES } from '../config/constants.js';
 import { emitToUsers } from '../sockets/emitter.js';
 
-const USER_FIELDS = 'fullName avatar role phone';
+const USER_FIELDS = 'fullName avatar role phone honorific';
 
 // Danh bạ: T → PH của các bé trong lớp mình (kèm bé); PH → GV lớp của các con (kèm bé)
 export async function contacts(user) {

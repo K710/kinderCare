@@ -9,7 +9,7 @@ import { errorMessage } from '../../api/axios.js';
 import { useFetch, useDebounce } from '../../hooks/useFetch.js';
 import { usePagination } from '../../hooks/usePagination.js';
 import { toast } from '../../stores/toast.store.js';
-import { Button, Input, Select, Textarea, SearchInput, DataTable, StatusChip, Chip, Modal, ConfirmDialog, Avatar, StatTile, Skeleton } from '../../components/ui/index.js';
+import { Button, Input, Select, Textarea, SearchInput, DataTable, StatusChip, Chip, Modal, ConfirmDialog, Avatar, StatTile, Skeleton, DatePicker } from '../../components/ui/index.js';
 import { EntityPicker } from '../../components/shared/EntityPicker.jsx';
 import { TuitionItemsEditor, normalizeItems } from '../../components/shared/TuitionItemsEditor.jsx';
 import { FormError } from '../../components/shared/FormError.jsx';
@@ -108,7 +108,7 @@ function BulkModal({ open, onClose, classes, schoolYear, onDone }) {
           <Select label="Lớp" value={classId} onChange={(e) => setClassId(e.target.value)} options={classes.map((c) => ({ value: c._id, label: `${c.name} (${c.studentCount} bé)` }))} placeholder="Chọn lớp" />
           <div className="grid grid-cols-2 gap-3">
             <Input label="Tháng" type="month" value={month} onChange={(e) => { setMonth(e.target.value); if (e.target.value) setDueDate(defaultDue(e.target.value)); }} />
-            <Input label="Hạn đóng" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+            <DatePicker label="Hạn đóng" value={dueDate} clearable={false} onChange={(v) => v && setDueDate(v)} />
           </div>
           <TuitionItemsEditor items={items} onChange={setItems} />
           <FormError message={err} />
@@ -183,7 +183,7 @@ function TuitionFormModal({ open, onClose, tuition, schoolYear, onSaved }) {
         )}
         <div className="grid grid-cols-2 gap-3">
           <Input label="Tháng" type="month" value={month} disabled={isEdit} onChange={(e) => { setMonth(e.target.value); if (e.target.value) setDueDate(defaultDue(e.target.value)); }} />
-          <Input label="Hạn đóng" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+          <DatePicker label="Hạn đóng" value={dueDate} clearable={false} onChange={(v) => v && setDueDate(v)} />
         </div>
         <TuitionItemsEditor items={items} onChange={setItems} />
         {hasMoney && (

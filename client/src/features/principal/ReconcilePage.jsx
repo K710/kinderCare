@@ -7,7 +7,7 @@ import { errorMessage } from '../../api/axios.js';
 import { useFetch, useDebounce } from '../../hooks/useFetch.js';
 import { usePagination } from '../../hooks/usePagination.js';
 import { toast } from '../../stores/toast.store.js';
-import { Button, Input, Select, Textarea, SearchInput, DataTable, StatusChip, Modal, ConfirmDialog, Avatar, Tabs, Skeleton } from '../../components/ui/index.js';
+import { Button, Input, Select, Textarea, SearchInput, DataTable, StatusChip, Modal, ConfirmDialog, Avatar, Tabs, Skeleton, DatePicker } from '../../components/ui/index.js';
 import { EntityPicker } from '../../components/shared/EntityPicker.jsx';
 import { FormError } from '../../components/shared/FormError.jsx';
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
@@ -15,6 +15,27 @@ import { PageHeader } from '../../components/layout/PageHeader.jsx';
 import { PAYMENT_STATUS, PAYMENT_METHOD, TUITION_STATUS } from '../../utils/constants.js';
 import { formatMoney, formatMonth, formatDateTime, formatDate } from '../../utils/format.js';
 import { TuitionDetailModal } from './TuitionsPage.jsx';
+
+// Bỏ dấu, thường hoá để so khớp tên trong nội dung chuyển khoản
+const strip = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'd').toLowerCase();
+// Gợi ý bé có tên xuất hiện trong nội dung CK: tên ở nhà hoặc ≥1 từ dài ≥4 ký tự / ≥2 từ trong họ tên
+export function suggestStudents(content, students = []) {
+  const text = ` ${strip(content).replace(/[^a-z0-9]+/g, ' ')} `;
+  if (text.trim().length < 2) return [];
+  return students
+    .map((s) => {
+      const tokens = strip(s.fullName).split(/\s+/).filter(Boolean);
+      const hits = tokens.filter((t) => text.includes(` ${t} `));
+      let score = hits.reduce((sum, t) => sum + t.length, 0);
+      if (hits.length < 2 && !hits.some((t) => t.length >= 4)) score = 0;
+      if (s.nickname && text.includes(` ${strip(s.nickname)} `)) score += 10;
+      return { s, score };
+    })
+    .filter((x) => x.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3)
+    .map((x) => x.s);
+}
 
 const STATUS_OPTIONS = Object.entries(PAYMENT_STATUS).map(([value, s]) => ({ value, label: s.label }));
 const METHOD_OPTIONS = Object.entries(PAYMENT_METHOD).map(([value, s]) => ({ value, label: s.label }));
@@ -62,6 +83,12 @@ function TuitionSelector({ student, setStudent, tuitionId, setTuitionId, amountH
           ) : (
             <p className="text-sm text-ink-soft">Bé chưa có học phí nào. Tạo học phí trước.</p>
           )}
+          {(() => {
+            const sel = (tuitions || []).find((t) => t._id === tuitionId);
+            return sel && sel.amount - sel.paidAmount <= 0 ? (
+              <p className="mt-2 rounded-card border border-peach bg-peach-soft px-3 py-2 text-sm text-[#B5412F]">Học phí {formatMonth(sel.month)} đã đóng đủ. Gán thêm sẽ ghi nhận thanh toán thừa (có ghi chú), hãy kiểm tra lại bé và tháng.</p>
+            ) : null;
+          })()}
           {amountHint}
         </div>
       )}
@@ -72,6 +99,8 @@ function TuitionSelector({ student, setStudent, tuitionId, setTuitionId, amountH
 /* ---------- Gán giao dịch chưa khớp vào học phí ---------- */
 function AssignModal({ payment, onClose, onDone }) {
   const [student, setStudent] = useState([]);
+  const { data: allStudents } = useFetch(() => studentApi.list({ limit: 100 }).then((r) => r.data), []);
+  const suggestions = suggestStudents(payment?.content, allStudents || []).filter((s) => s._id !== student[0]?._id);
   const [tuitionId, setTuitionId] = useState('');
   const [note, setNote] = useState('');
   const [err, setErr] = useState('');
@@ -105,6 +134,19 @@ function AssignModal({ payment, onClose, onDone }) {
       }
     >
       <div className="space-y-4">
+        {suggestions.length > 0 && (
+          <div className="rounded-card border border-sun bg-sun-soft p-3 text-sm">
+            <p className="font-medium">Gợi ý theo tên trong nội dung chuyển khoản</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {suggestions.map((s) => (
+                <button key={s._id} type="button" onClick={() => { setStudent([s]); setTuitionId(''); }} className="touch md:min-h-9 inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 text-sm hover:bg-paper">
+                  <Avatar name={s.fullName} src={s.avatar} size="sm" />
+                  <span><strong>{s.nickname || s.fullName}</strong>{s.nickname ? ` · ${s.fullName}` : ''}{s.class?.name ? ` · ${s.class.name}` : ''}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <TuitionSelector student={student} setStudent={setStudent} tuitionId={tuitionId} setTuitionId={setTuitionId} />
         <Textarea label="Ghi chú" rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="vd: PH ghi sai nội dung chuyển khoản" />
         <FormError message={err} />
@@ -156,7 +198,7 @@ function CashModal({ open, onClose, onDone }) {
         <TuitionSelector student={student} setStudent={setStudent} tuitionId={tuitionId} setTuitionId={setTuitionId} />
         <div className="grid grid-cols-2 gap-3">
           <Input label="Số tiền (₫)" type="number" inputMode="numeric" min={1} step={1000} value={amount} onChange={(e) => setAmount(e.target.value)} />
-          <Input label="Ngày thu" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <DatePicker label="Ngày thu" value={date} max={new Date().toISOString().slice(0, 10)} clearable={false} onChange={(v) => v && setDate(v)} />
         </div>
         <Textarea label="Ghi chú" rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Không bắt buộc" />
         <FormError message={err} />
@@ -196,12 +238,12 @@ export default function ReconcilePage() {
         ]}
       />
 
-      <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-[1fr_150px_150px_150px_150px]">
+      <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-[1fr_180px_180px_160px_160px]">
         <SearchInput className="col-span-2 md:col-span-1" value={filters.search} onChange={(v) => setFilters({ search: v })} placeholder="Tìm theo mã HP, nội dung CK" />
         {tab === 'all' && <Select value={filters.status} onChange={(e) => setFilters({ status: e.target.value })} options={STATUS_OPTIONS} placeholder="Mọi trạng thái" aria-label="Lọc trạng thái" />}
         <Select value={filters.method} onChange={(e) => setFilters({ method: e.target.value })} options={METHOD_OPTIONS} placeholder="Mọi phương thức" aria-label="Lọc phương thức" className={tab === 'all' ? '' : 'col-span-2 md:col-span-1'} />
-        <Input type="date" value={filters.from} onChange={(e) => setFilters({ from: e.target.value })} aria-label="Từ ngày" />
-        <Input type="date" value={filters.to} onChange={(e) => setFilters({ to: e.target.value ? `${e.target.value}T23:59:59` : '' })} aria-label="Đến ngày" />
+        <DatePicker value={filters.from} onChange={(v) => setFilters({ from: v })} placeholder="Từ ngày" aria-label="Từ ngày" />
+        <DatePicker value={filters.to.slice(0, 10)} onChange={(v) => setFilters({ to: v ? `${v}T23:59:59` : '' })} placeholder="Đến ngày" aria-label="Đến ngày" />
       </div>
 
       <ErrorBanner message={error} onRetry={reload} className="mb-4" />
@@ -220,13 +262,12 @@ export default function ReconcilePage() {
             render: (p) => (
               <div>
                 <p className="font-medium tabular-nums">{formatDateTime(p.transactionDate)}</p>
-                <p className="max-w-xs truncate text-xs text-ink-soft" title={p.content}>{p.content || p.note || p.referenceCode || '—'}</p>
+                <p className="max-w-[240px] truncate text-xs text-ink-soft" title={p.content}>{p.content || p.note || p.referenceCode || '—'}</p>
               </div>
             ),
           },
           { key: 'amount', title: 'Số tiền', align: 'right', render: (p) => <span className="font-display text-base font-semibold tabular-nums">{formatMoney(p.amount)}</span> },
-          { key: 'method', title: 'Phương thức', card: 'chip', render: (p) => <StatusChip map={PAYMENT_METHOD} value={p.method} /> },
-          { key: 'status', title: 'Trạng thái', card: 'chip', render: (p) => <StatusChip map={PAYMENT_STATUS} value={p.status} /> },
+          { key: 'kind', title: 'Loại / trạng thái', card: 'chip', render: (p) => <div className="flex flex-wrap items-center gap-1"><StatusChip map={PAYMENT_METHOD} value={p.method} /><StatusChip map={PAYMENT_STATUS} value={p.status} /></div> },
           {
             key: 'tuition',
             title: 'Học phí',
