@@ -26,7 +26,8 @@ const paymentSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-paymentSchema.index({ sepayId: 1 }, { unique: true, sparse: true });
+// Chống trùng webhook: chỉ áp cho giao dịch SePay (có số), tiền mặt sepayId=null không bị tính trùng
+paymentSchema.index({ sepayId: 1 }, { unique: true, partialFilterExpression: { sepayId: { $type: 'number' } } });
 paymentSchema.index({ tuition: 1 });
 paymentSchema.index({ status: 1, transactionDate: -1 });
 paymentSchema.index({ paymentCode: 1 });

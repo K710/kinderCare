@@ -303,3 +303,13 @@ test('tiền mặt: ghi nhận → Payment cash/manual + Tuition; xoá cần lý
   await wait(150);
   assert.ok(await M.AuditLog.exists({ action: 'DELETE_CASH_PAYMENT' }));
 });
+
+test('tiền mặt: nhiều giao dịch không có sepayId vẫn lưu được (index unique chỉ áp cho số)', async () => {
+  const a = await app.call('POST', '/api/v1/payments/manual', { token: tok.principal, body: { tuitionId: ids.tu2, amount: 100000 } });
+  const b = await app.call('POST', '/api/v1/payments/manual', { token: tok.principal, body: { tuitionId: ids.tu2, amount: 200000 } });
+  assert.equal(a.status, 201);
+  assert.equal(b.status, 201);
+  assert.ok((await M.Payment.countDocuments({ method: 'cash', tuition: ids.tu2 })) >= 2);
+  // trùng sepayId số vẫn bị chặn
+  await assert.rejects(M.Payment.create({ sepayId: 777001, amount: 1, tuition: ids.tu2 }).then(() => M.Payment.create({ sepayId: 777001, amount: 1, tuition: ids.tu2 })), /E11000|duplicate/);
+});

@@ -49,7 +49,7 @@
 ## GĐ7 – Hoàn thiện
 - [ ] 7.1 Socket.IO (thông báo, chat, payment:success)
 - [ ] 7.2 Xuất Excel/PDF
-- [ ] 7.3 Seed dữ liệu demo (4 tài khoản)
+- [x] 7.3 Seed dữ liệu demo (4 tài khoản) (làm sớm theo yêu cầu, trước khi duyệt GĐ6)
 - [ ] 7.4 Test SePay thật: nút Gửi thử (ngrok/cloudflared) + 1 giao dịch thật số tiền nhỏ, test trọn luồng từ trang thanh toán của phụ huynh
 - [ ] 7.5 README chạy & deploy
 
@@ -126,6 +126,9 @@
 - Chat dùng chung GV/PH (features/chat), poll 10s lịch sử + 20s hội thoại cho tới khi có socket (7.1); ảnh nhận xét upload qua /upload/images lấy URL.
 - PH: bé đang chọn lấy từ `user.children` (/auth/me) + `ui.store.selectedChildId` (hook useSelectedChild); trang thanh toán poll /payments/status 5s tối đa 15 phút, QR cập nhật theo số còn lại; biên lai dùng /tuitions/:id + lastPayment từ status (PH không có quyền list Payment).
 - Trang ngoài 5 tab PH (album, thực đơn, tăng trưởng, xin nghỉ, dặn thuốc, thông báo) mở từ lối tắt trang chủ, header có nút quay lại; link thông báo `/parent/*/:id` trỏ về trang danh sách.
+- Seed (`npm run seed`, chỉ dev, từ chối production trừ --force): XOÁ TOÀN BỘ DB rồi tạo lại demo (1 admin, 1 HT, 2 GV, 3 PH chính + 6 PH phụ, 2 lớp, 10 bé, 10 ngày điểm danh/nhận xét, 8 tháng cân đo, thực đơn, kế hoạch, album, học phí đủ trạng thái, 1 unmatched, đơn nghỉ, dặn thuốc, tin nhắn); PRNG cố định để lặp lại giống nhau.
+- [Thanh toán – cần xác nhận] Payment.sepayId: đổi unique sparse → unique partial (`$type: number`). Lý do: sparse không bỏ qua `null`, giao dịch tiền mặt thứ hai bị E11000; thêm test hồi quy.
+- GrowthChart dùng dữ liệu WHO gốc: utils/whoGrowth.js chứa tham số LMS 0–60 tháng (weight-for-age, length/height-for-age, theo giới) tải từ who.int, tính giá trị tại z bằng công thức LMS + z-score lần đo gần nhất; ghi nguồn dưới biểu đồ.
 - Token thêm `role.principal.soft/dark` (#EFEBFE/#5A3FD0) cho chip Hiệu trưởng theo phản hồi UI; Chip có tone `principal`.
 
 ## Nhật ký
@@ -164,6 +167,8 @@
 - 2026-10-18 | 5.4 | StaffLayout (Sidebar/Header/UserMenu/Bell), ParentLayout (ChildSwitcher/MobileNav), UI: Button/Input/Avatar/Chip/Skeleton/EmptyState/Toast; build OK
 - 2026-10-18 | 6.1 | Admin: Tổng quan, Tài khoản (CRUD/khoá/reset MK), Năm học, Nhật ký; UI: Modal/ConfirmDialog/Select/Textarea/DataTable/StatTile/Tabs/SearchInput; hooks useFetch/usePagination
 - 2026-10-18 | 6.1 | Sửa logic: self-lock/role, LAST_ADMIN, xoá năm học có dữ liệu, mustChangePassword + mật khẩu tạm 1 lần, chính sách MK production; 5 test mới
+- 2026-10-18 | 7.3 | Seed demo reset được, in danh sách tài khoản; sửa index sepayId (tiền mặt trùng null) + test
+- 2026-10-18 | 6.4 | GrowthChart: thay bảng xấp xỉ bằng LMS WHO gốc 0–60 tháng, ghi nguồn, nhận định z-score
 - 2026-10-18 | 6.4 | PH: Hôm nay (timeline), Lịch, Học phí + Thanh toán QR + Biên lai, Tài khoản, Album, Thực đơn, Tăng trưởng, Xin nghỉ, Dặn thuốc, Chat
 - 2026-10-18 | 6.3 | GV: Tổng quan, Lớp của tôi (hồ sơ bé + tăng trưởng), Điểm danh 1 chạm, Nhận xét chip, Album, Kế hoạch, Đo sức khoẻ, Đơn nghỉ, Dặn thuốc, Chat
 - 2026-10-18 | 6.2 | HT: Tổng quan + biểu đồ 30 ngày, Lớp (+chi tiết), Học sinh, Giáo viên, Thực đơn, Kế hoạch, Học phí, Đối soát, Thông báo
