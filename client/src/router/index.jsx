@@ -24,6 +24,16 @@ import MenusPage from '../features/principal/MenusPage.jsx';
 import LessonPlansPage from '../features/principal/LessonPlansPage.jsx';
 import TuitionsPage from '../features/principal/TuitionsPage.jsx';
 import ReconcilePage from '../features/principal/ReconcilePage.jsx';
+import TeacherDashboardPage from '../features/teacher/DashboardPage.jsx';
+import MyClassPage from '../features/teacher/MyClassPage.jsx';
+import AttendancePage from '../features/teacher/AttendancePage.jsx';
+import DailyReportsPage from '../features/teacher/DailyReportsPage.jsx';
+import AlbumsPage from '../features/teacher/AlbumsPage.jsx';
+import TeacherLessonPlansPage from '../features/teacher/LessonPlansPage.jsx';
+import HealthPage from '../features/teacher/HealthPage.jsx';
+import LeaveRequestsPage from '../features/teacher/LeaveRequestsPage.jsx';
+import MedicineNotesPage from '../features/teacher/MedicineNotesPage.jsx';
+import ChatPage from '../features/chat/ChatPage.jsx';
 
 // "/" → trang chủ theo vai trò (hoặc /login)
 function RootRedirect() {
@@ -95,16 +105,17 @@ export const router = createBrowserRouter([
         path: PATHS.teacher.root,
         element: <StaffLayout />,
         children: [
-          { index: true, ...soon('Tổng quan') },
-          { path: 'class', ...soon('Lớp của tôi') },
-          { path: 'attendance', ...soon('Điểm danh') },
-          { path: 'daily-reports', ...soon('Nhận xét ngày') },
-          { path: 'albums', ...soon('Album ảnh') },
-          { path: 'lesson-plans', ...soon('Kế hoạch giảng dạy') },
-          { path: 'health', ...soon('Chiều cao, cân nặng') },
-          { path: 'leave-requests', ...soon('Đơn xin nghỉ') },
-          { path: 'medicine-notes', ...soon('Dặn thuốc') },
-          { path: 'chat', ...soon('Tin nhắn') },
+          { index: true, element: <TeacherDashboardPage /> },
+          { path: 'class', element: <MyClassPage /> },
+          { path: 'attendance', element: <AttendancePage /> },
+          { path: 'daily-reports', element: <DailyReportsPage /> },
+          { path: 'albums', element: <AlbumsPage /> },
+          { path: 'lesson-plans', element: <TeacherLessonPlansPage /> },
+          { path: 'health', element: <HealthPage /> },
+          { path: 'leave-requests', element: <LeaveRequestsPage /> },
+          { path: 'medicine-notes', element: <MedicineNotesPage /> },
+          { path: 'chat', element: <ChatPage /> },
+          { path: 'notifications', element: <NotificationsPage /> },
         ],
       },
     ],
