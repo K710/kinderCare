@@ -1,37 +1,22 @@
 import { ResponsiveContainer, ComposedChart, Area, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import dayjs from '../../utils/dayjs.js';
 import { Skeleton } from '../ui/Skeleton.jsx';
-
-/**
- * Vùng tham khảo WHO (xấp xỉ, -2SD / trung vị / +2SD) theo tháng tuổi 12–72.
- * Nguồn: WHO Child Growth Standards (làm tròn). Chỉ để tham khảo, không thay chẩn đoán.
- */
-const WHO = {
-  male: {
-    weight: { 12: [7.7, 9.6, 12.0], 18: [8.8, 10.9, 13.7], 24: [9.7, 12.2, 15.3], 36: [11.3, 14.3, 18.3], 48: [12.7, 16.3, 21.2], 60: [14.1, 18.3, 24.2], 72: [15.3, 20.5, 27.1] },
-    height: { 12: [71.0, 75.7, 80.5], 18: [76.9, 82.3, 87.7], 24: [81.0, 87.1, 93.2], 36: [88.7, 96.1, 103.5], 48: [94.9, 103.3, 111.7], 60: [100.7, 110.0, 119.2], 72: [106.1, 116.0, 125.8] },
-  },
-  female: {
-    weight: { 12: [7.0, 8.9, 11.5], 18: [8.1, 10.2, 13.2], 24: [9.0, 11.5, 14.8], 36: [10.8, 13.9, 18.1], 48: [12.3, 16.1, 21.5], 60: [13.7, 18.2, 24.9], 72: [15.3, 20.2, 27.8] },
-    height: { 12: [68.9, 74.0, 79.2], 18: [74.9, 80.7, 86.5], 24: [79.3, 85.7, 92.2], 36: [87.4, 95.1, 102.7], 48: [94.1, 102.7, 111.3], 60: [99.9, 109.4, 118.9], 72: [104.9, 115.1, 125.4] },
-  },
-};
-
-// Nội suy tuyến tính giá trị WHO tại tháng tuổi m
-function whoAt(table, m) {
-  const keys = Object.keys(table).map(Number).sort((a, b) => a - b);
-  if (m <= keys[0]) return table[keys[0]];
-  if (m >= keys[keys.length - 1]) return table[keys[keys.length - 1]];
-  const hi = keys.find((k) => k >= m);
-  const lo = keys[keys.indexOf(hi) - 1];
-  const t = (m - lo) / (hi - lo);
-  return table[lo].map((v, i) => +(v + (table[hi][i] - v) * t).toFixed(1));
-}
+import { whoValue, whoZ } from '../../utils/whoGrowth.js';
 
 const CFG = {
   weight: { label: 'Cân nặng', unit: 'kg', color: '#2F9E5B' },
   height: { label: 'Chiều cao', unit: 'cm', color: '#4BA3E3' },
 };
+
+// Nhận định theo z-score WHO (chỉ để tham khảo)
+export function zLabel(z) {
+  if (z == null) return null;
+  if (z < -3) return { text: 'Thấp hơn chuẩn nhiều (dưới −3SD)', tone: 'berry' };
+  if (z < -2) return { text: 'Thấp hơn chuẩn (dưới −2SD)', tone: 'peach' };
+  if (z > 3) return { text: 'Cao hơn chuẩn nhiều (trên +3SD)', tone: 'berry' };
+  if (z > 2) return { text: 'Cao hơn chuẩn (trên +2SD)', tone: 'sun' };
+  return { text: 'Trong khoảng bình thường (−2SD đến +2SD)', tone: 'leaf' };
+}
 
 function Tip({ active, payload, metric }) {
   if (!active || !payload?.length) return null;
@@ -39,45 +24,45 @@ function Tip({ active, payload, metric }) {
   const c = CFG[metric];
   return (
     <div className="card px-3 py-2 text-xs shadow-float">
-      <p className="font-medium">{d.dateLabel} · {d.ageLabel}</p>
-      {d.value != null && <p style={{ color: c.color }}>{c.label}: <strong>{d.value} {c.unit}</strong></p>}
+      <p className="font-medium">{d.dateLabel || `${Math.round(d.age)} tháng tuổi`}{d.dateLabel ? ` · ${Math.floor(d.age)} tháng` : ''}</p>
+      {d.value != null && <p style={{ color: c.color }}>{c.label}: <strong>{d.value} {c.unit}</strong>{d.z != null && <span className="text-ink-soft"> (z = {d.z})</span>}</p>}
       {d.bmi != null && <p className="text-ink-soft">BMI {d.bmi}</p>}
-      {d.lo != null && <p className="text-ink-soft">WHO: {d.lo} – {d.hi} {c.unit}</p>}
+      <p className="text-ink-soft">WHO: {d.band[0]} – {d.band[1]} {c.unit} · trung vị {d.mid}</p>
     </div>
   );
 }
 
 /**
- * Biểu đồ tăng trưởng 1 bé: đường đo thực tế + vùng chuẩn WHO nhạt.
- * records: [{ measuredAt, height, weight, bmi }], dateOfBirth, gender ('male'|'female'), metric 'weight'|'height'
+ * Biểu đồ tăng trưởng 1 bé: đường đo thực tế + vùng tham khảo WHO (−2SD…+2SD) + trung vị.
+ * records: [{ measuredAt, height, weight, bmi }], dateOfBirth, gender 'male'|'female', metric 'weight'|'height'
+ * Dữ liệu WHO: utils/whoGrowth.js (LMS gốc, 0–60 tháng).
  */
 export function GrowthChart({ records = [], dateOfBirth, gender = 'male', metric = 'weight', loading = false, height = 240 }) {
   if (loading) return <Skeleton className="h-60 w-full" />;
+  if (!dateOfBirth) return <p className="py-8 text-center text-sm text-ink-soft">Thiếu ngày sinh nên chưa vẽ được biểu đồ.</p>;
   const c = CFG[metric];
-  const table = WHO[gender]?.[metric] || WHO.male[metric];
+  const sex = gender === 'female' ? 'female' : 'male';
   const dob = dayjs(dateOfBirth);
+  const ageOf = (d) => Math.max(0, dayjs(d).diff(dob, 'month', true));
   const sorted = [...records].sort((a, b) => new Date(a.measuredAt) - new Date(b.measuredAt));
 
-  // Trục tháng tuổi: từ lần đo đầu (hoặc 12 tháng) tới lần đo cuối (hoặc hiện tại), tối thiểu 12 tháng
-  const ageOf = (d) => Math.max(0, dayjs(d).diff(dob, 'month', true));
-  const first = sorted.length ? Math.floor(ageOf(sorted[0].measuredAt)) : Math.floor(ageOf(new Date())) - 6;
-  const last = Math.ceil(Math.max(ageOf(new Date()), sorted.length ? ageOf(sorted[sorted.length - 1].measuredAt) : 0));
-  const from = Math.max(6, Math.min(first - 2, last - 12));
-  const to = Math.max(from + 12, last + 2);
+  // Trục tháng tuổi (0–60): quanh các lần đo, tối thiểu 12 tháng
+  const nowAge = ageOf(new Date());
+  const firstAge = sorted.length ? ageOf(sorted[0].measuredAt) : nowAge - 6;
+  const lastAge = Math.max(nowAge, sorted.length ? ageOf(sorted[sorted.length - 1].measuredAt) : 0);
+  const from = Math.max(0, Math.floor(Math.min(firstAge - 2, lastAge - 12)));
+  const to = Math.min(60, Math.max(from + 12, Math.ceil(lastAge + 2)));
 
   const rows = [];
-  for (let m = from; m <= to; m++) {
-    const [lo, mid, hi] = whoAt(table, m);
-    rows.push({ age: m, lo, mid, hi, band: [lo, hi], ageLabel: `${m} tháng` });
-  }
+  for (let m = from; m <= to; m++) rows.push({ age: m, band: [whoValue(sex, metric, m, -2), whoValue(sex, metric, m, 2)], mid: whoValue(sex, metric, m, 0) });
   for (const r of sorted) {
     const age = +ageOf(r.measuredAt).toFixed(1);
-    const [lo, , hi] = whoAt(table, age);
-    rows.push({ age, value: r[metric], bmi: r.bmi, lo, hi, dateLabel: dayjs(r.measuredAt).format('DD/MM/YYYY'), ageLabel: `${Math.floor(age)} tháng` });
+    if (age > 60) continue; // ngoài phạm vi chuẩn WHO 0–5 tuổi
+    rows.push({ age, value: r[metric], bmi: r.bmi, z: whoZ(sex, metric, age, r[metric]), band: [whoValue(sex, metric, age, -2), whoValue(sex, metric, age, 2)], mid: whoValue(sex, metric, age, 0), dateLabel: dayjs(r.measuredAt).format('DD/MM/YYYY') });
   }
   rows.sort((a, b) => a.age - b.age);
-
-  if (!dateOfBirth) return <p className="py-8 text-center text-sm text-ink-soft">Thiếu ngày sinh nên chưa vẽ được biểu đồ.</p>;
+  const last = [...rows].reverse().find((r) => r.value != null);
+  const verdict = last ? zLabel(last.z) : null;
 
   return (
     <div>
@@ -87,12 +72,19 @@ export function GrowthChart({ records = [], dateOfBirth, gender = 'male', metric
           <XAxis dataKey="age" type="number" domain={[from, to]} tickFormatter={(v) => `${v}t`} tick={{ fontSize: 12, fill: '#5B6478' }} tickLine={false} axisLine={false} />
           <YAxis domain={['auto', 'auto']} tick={{ fontSize: 12, fill: '#5B6478' }} tickLine={false} axisLine={false} unit={` ${c.unit}`} width={60} />
           <Tooltip content={<Tip metric={metric} />} />
-          <Area type="monotone" dataKey="band" stroke="none" fill={c.color} fillOpacity={0.12} connectNulls isAnimationActive={false} name="Vùng WHO" />
-          <Line type="monotone" dataKey="mid" stroke={c.color} strokeOpacity={0.35} strokeDasharray="4 4" dot={false} connectNulls isAnimationActive={false} name="Trung vị WHO" />
+          <Area type="monotone" dataKey="band" stroke="none" fill={c.color} fillOpacity={0.12} isAnimationActive={false} name="Vùng WHO −2SD…+2SD" />
+          <Line type="monotone" dataKey="mid" stroke={c.color} strokeOpacity={0.4} strokeDasharray="4 4" dot={false} isAnimationActive={false} name="Trung vị WHO" />
           <Line type="monotone" dataKey="value" stroke={c.color} strokeWidth={2.5} dot={{ r: 4, fill: c.color }} connectNulls isAnimationActive={false} name={c.label} />
         </ComposedChart>
       </ResponsiveContainer>
-      <p className="mt-1 text-xs text-ink-soft">Vùng màu nhạt: khoảng tham khảo WHO (−2SD đến +2SD) theo tháng tuổi. Nét đứt: trung vị.</p>
+      {verdict && (
+        <p className="mt-2 text-sm">
+          Lần đo gần nhất: <strong>{last.value} {c.unit}</strong> · z-score {last.z} · <span className={`text-${verdict.tone === 'leaf' ? 'leaf-dark' : verdict.tone}`}>{verdict.text}</span>
+        </p>
+      )}
+      <p className="mt-1 text-xs text-ink-soft">
+        Vùng màu nhạt: −2SD đến +2SD, nét đứt: trung vị. Nguồn: WHO Child Growth Standards (2006), bảng {metric === 'weight' ? 'weight-for-age' : 'length/height-for-age'} theo giới tính, 0–5 tuổi (who.int/tools/child-growth-standards). Chỉ để tham khảo, không thay chẩn đoán của bác sĩ.
+      </p>
     </div>
   );
 }
