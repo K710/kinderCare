@@ -14,6 +14,16 @@ import AdminDashboardPage from '../features/admin/DashboardPage.jsx';
 import UsersPage from '../features/admin/UsersPage.jsx';
 import SchoolYearsPage from '../features/admin/SchoolYearsPage.jsx';
 import AuditLogsPage from '../features/admin/AuditLogsPage.jsx';
+import NotificationsPage from '../features/notifications/NotificationsPage.jsx';
+import PrincipalDashboardPage from '../features/principal/DashboardPage.jsx';
+import ClassesPage from '../features/principal/ClassesPage.jsx';
+import ClassDetailPage from '../features/principal/ClassDetailPage.jsx';
+import StudentsPage from '../features/principal/StudentsPage.jsx';
+import TeachersPage from '../features/principal/TeachersPage.jsx';
+import MenusPage from '../features/principal/MenusPage.jsx';
+import LessonPlansPage from '../features/principal/LessonPlansPage.jsx';
+import TuitionsPage from '../features/principal/TuitionsPage.jsx';
+import ReconcilePage from '../features/principal/ReconcilePage.jsx';
 
 // "/" → trang chủ theo vai trò (hoặc /login)
 function RootRedirect() {
@@ -48,7 +58,7 @@ export const router = createBrowserRouter([
           { path: 'users', element: <UsersPage /> },
           { path: 'school-years', element: <SchoolYearsPage /> },
           { path: 'audit-logs', element: <AuditLogsPage /> },
-          { path: 'notifications', ...soon('Thông báo') },
+          { path: 'notifications', element: <NotificationsPage /> },
         ],
       },
     ],
@@ -62,15 +72,16 @@ export const router = createBrowserRouter([
         path: PATHS.principal.root,
         element: <StaffLayout />,
         children: [
-          { index: true, ...soon('Tổng quan') },
-          { path: 'classes', ...soon('Lớp học') },
-          { path: 'students', ...soon('Học sinh') },
-          { path: 'teachers', ...soon('Giáo viên') },
-          { path: 'menus', ...soon('Thực đơn') },
-          { path: 'lesson-plans', ...soon('Kế hoạch giảng dạy') },
-          { path: 'tuitions', ...soon('Học phí') },
-          { path: 'reconcile', ...soon('Đối soát') },
-          { path: 'notifications', ...soon('Thông báo') },
+          { index: true, element: <PrincipalDashboardPage /> },
+          { path: 'classes', element: <ClassesPage /> },
+          { path: 'classes/:id', element: <ClassDetailPage /> },
+          { path: 'students', element: <StudentsPage /> },
+          { path: 'teachers', element: <TeachersPage /> },
+          { path: 'menus', element: <MenusPage /> },
+          { path: 'lesson-plans', element: <LessonPlansPage /> },
+          { path: 'tuitions', element: <TuitionsPage /> },
+          { path: 'reconcile', element: <ReconcilePage /> },
+          { path: 'notifications', element: <NotificationsPage /> },
         ],
       },
     ],

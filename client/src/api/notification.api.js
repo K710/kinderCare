@@ -5,4 +5,6 @@ export const notificationApi = {
   unreadCount: () => api.get('/notifications/unread-count').then((r) => r.data.data.count),
   markRead: (id) => api.patch(`/notifications/${id}/read`).then((r) => r.data.data),
   markAllRead: () => api.patch('/notifications/read-all').then((r) => r.data.data),
+  create: (data) => api.post('/notifications', data).then((r) => r.data.data),
+  remove: (id) => api.delete(`/notifications/${id}`).then((r) => r.data),
 };

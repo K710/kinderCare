@@ -7,6 +7,17 @@ export default defineConfig({
   resolve: {
     alias: { '@': path.resolve(__dirname, 'src') },
   },
+  build: {
+    // Tách vendor để chunk chính nhẹ hơn (recharts khá nặng)
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom', 'react-router-dom'],
+          charts: ['recharts'],
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     // Dev: proxy API + socket về server để cookie refresh cùng origin

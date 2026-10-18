@@ -9,7 +9,7 @@ import { Menu } from '../models/Menu.js';
 import { LessonPlan } from '../models/LessonPlan.js';
 import { Tuition } from '../models/Tuition.js';
 import { AuditLog } from '../models/AuditLog.js';
-import { todayKey, monthKey } from '../utils/date.js';
+import { todayKey, monthKey, eachDay } from '../utils/date.js';
 import { summary as tuitionSummary } from './tuition.service.js';
 import { unreadCount as notifUnread } from './notification.service.js';
 import { unreadTotal as messageUnread } from './message.service.js';
@@ -30,9 +30,30 @@ async function attendanceToday(classIds) {
   return { date: today, total, marked, unmarked: Math.max(0, total - marked), ...counts };
 }
 
+// Chuyên cần theo ngày trong N ngày gần nhất (bỏ T7/CN), toàn trường: [{ date, present, late, absent, excused, rate }]
+async function attendanceTrend(days = 30) {
+  const to = todayKey();
+  const from = new Date(to.getTime() - (days - 1) * 86400000);
+  const rows = await Attendance.aggregate([
+    { $match: { date: { $gte: from, $lte: to } } },
+    { $group: { _id: { date: '$date', status: '$status' }, n: { $sum: 1 } } },
+  ]);
+  const byDay = new Map();
+  for (const r of rows) {
+    const k = r._id.date.toISOString();
+    if (!byDay.has(k)) byDay.set(k, { date: r._id.date, present: 0, late: 0, absent: 0, excused: 0 });
+    byDay.get(k)[r._id.status] = r.n;
+  }
+  return eachDay(from, to, { skipWeekend: true }).map((d) => {
+    const c = byDay.get(d.toISOString()) || { date: d, present: 0, late: 0, absent: 0, excused: 0 };
+    const total = c.present + c.late + c.absent + c.excused;
+    return { ...c, total, rate: total ? Math.round(((c.present + c.late) / total) * 1000) / 10 : null };
+  });
+}
+
 export async function principal() {
   const month = monthKey();
-  const [students, teachers, classes, attendance, tuition, leave, medicine, menus, plans] = await Promise.all([
+  const [students, teachers, classes, attendance, tuition, leave, medicine, menus, plans, trend] = await Promise.all([
     Student.countDocuments({ status: 'active' }),
     User.countDocuments({ role: 'teacher', isActive: true }),
     Class.countDocuments({ isActive: true }),
@@ -42,10 +63,12 @@ export async function principal() {
     MedicineNote.countDocuments({ status: 'pending' }),
     Menu.countDocuments({ status: 'pending' }),
     LessonPlan.countDocuments({ status: 'pending' }),
+    attendanceTrend(30),
   ]);
   return {
     totals: { students, teachers, classes },
     attendanceToday: attendance,
+    attendanceTrend: trend,
     tuitionThisMonth: tuition,
     pending: { leaveRequests: leave, medicineNotes: medicine, menus, lessonPlans: plans },
   };

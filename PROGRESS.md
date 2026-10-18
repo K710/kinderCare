@@ -1,7 +1,7 @@
 # PROGRESS
 
 **Giai đoạn hiện tại:** 6 (dừng cuối GĐ6 chờ duyệt giao diện)
-**Task tiếp theo:** 6.2
+**Task tiếp theo:** 6.3
 
 ## GĐ1 – Thiết kế
 - [x] 1.1 Schema 17 models (trường, kiểu, ref, index)
@@ -42,7 +42,7 @@
 
 ## GĐ6 – Giao diện theo vai trò
 - [x] 6.1 Admin
-- [ ] 6.2 Hiệu trưởng (dashboard, học phí, đối soát)
+- [x] 6.2 Hiệu trưởng (dashboard, học phí, đối soát)
 - [ ] 6.3 Giáo viên
 - [ ] 6.4 Phụ huynh (mobile-first, trang thanh toán QR)
 
@@ -119,6 +119,8 @@
 - AuditLog: middleware audit(action, resource) ghi sau res.finish (không chặn request), mặc định chỉ 2xx, LOGIN ghi cả thất bại; che password/token; list không trả payload. Gắn vào auth, users, school-years, classes, students, tuitions, notifications.
 - Dashboard: 4 endpoint theo role, tái dùng tuition.summary / notification.unreadCount / message.unreadTotal.
 - DataTable < 768px tự chuyển dạng thẻ (cột `card: header|chip|meta|false`); cột `actions(row)` → desktop nút icon (IconButton có tooltip + aria-label), mobile gom vào ActionMenu "⋯". Áp dụng cho mọi bảng.
+- Dashboard HT trả thêm `attendanceTrend` (30 ngày, bỏ T7/CN, toàn trường) thay vì thêm endpoint riêng; client dùng recharts (tách chunk `charts`) cho biểu đồ.
+- EntityPicker (components/shared) dùng chung để chọn GV/PH/bé qua ô tìm; trang Thông báo dùng chung cho admin + HT (features/notifications).
 - Token thêm `role.principal.soft/dark` (#EFEBFE/#5A3FD0) cho chip Hiệu trưởng theo phản hồi UI; Chip có tone `principal`.
 
 ## Nhật ký
@@ -157,4 +159,5 @@
 - 2026-10-18 | 5.4 | StaffLayout (Sidebar/Header/UserMenu/Bell), ParentLayout (ChildSwitcher/MobileNav), UI: Button/Input/Avatar/Chip/Skeleton/EmptyState/Toast; build OK
 - 2026-10-18 | 6.1 | Admin: Tổng quan, Tài khoản (CRUD/khoá/reset MK), Năm học, Nhật ký; UI: Modal/ConfirmDialog/Select/Textarea/DataTable/StatTile/Tabs/SearchInput; hooks useFetch/usePagination
 - 2026-10-18 | 6.1 | Sửa logic: self-lock/role, LAST_ADMIN, xoá năm học có dữ liệu, mustChangePassword + mật khẩu tạm 1 lần, chính sách MK production; 5 test mới
+- 2026-10-18 | 6.2 | HT: Tổng quan + biểu đồ 30 ngày, Lớp (+chi tiết), Học sinh, Giáo viên, Thực đơn, Kế hoạch, Học phí, Đối soát, Thông báo
 - 2026-10-18 | 6.1 | Sửa UI theo phản hồi: bảng→thẻ mobile, ActionMenu, Tooltip/IconButton, chip HT tím, lọc 2 cột, autofill, drawer

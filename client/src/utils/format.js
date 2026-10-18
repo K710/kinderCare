@@ -19,6 +19,16 @@ export function formatMonth(m) {
   return `Tháng ${Number(mo)}/${y}`;
 }
 
+// Tuần bắt đầu thứ Hai: "Tuần 20/10 – 24/10/2026"
+export function formatWeek(weekStart) {
+  const s = dayjs(weekStart);
+  return `Tuần ${s.format('DD/MM')} – ${s.add(4, 'day').format('DD/MM/YYYY')}`;
+}
+// Thứ Hai (YYYY-MM-DD) của tuần chứa ngày d
+export const toMonday = (d) => dayjs(d).startOf('isoWeek').format('YYYY-MM-DD');
+export const currentMonth = () => dayjs().format('YYYY-MM');
+export const toInputDate = (d) => (d ? dayjs(d).format('YYYY-MM-DD') : '');
+
 // Tuổi: "3 tuổi 4 tháng"
 export function formatAge(dob) {
   const months = dayjs().diff(dayjs(dob), 'month');

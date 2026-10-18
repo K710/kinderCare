@@ -55,6 +55,22 @@ export const MEDICINE_STATUS = {
   cancelled: { label: 'Đã huỷ', tone: 'muted' },
 };
 
+export const STUDENT_STATUS = {
+  active: { label: 'Đang học', tone: 'leaf' },
+  graduated: { label: 'Đã tốt nghiệp', tone: 'sky' },
+  left: { label: 'Đã nghỉ', tone: 'muted' },
+};
+
+export const PAYMENT_METHOD = {
+  bank: { label: 'Chuyển khoản', tone: 'sky' },
+  cash: { label: 'Tiền mặt', tone: 'sun' },
+};
+
+export const NOTIFICATION_SCOPE_LABEL = { all: 'Toàn trường', role: 'Theo vai trò', class: 'Theo lớp', user: 'Người cụ thể' };
+export const NOTIFICATION_TYPE_LABEL = {
+  system: 'Hệ thống', school: 'Nhà trường', class: 'Lớp học', payment: 'Học phí', leave: 'Đơn nghỉ', medicine: 'Dặn thuốc', report: 'Nhận xét',
+};
+
 export const MEAL_LABEL = { good: 'Ăn hết', normal: 'Ăn vừa', little: 'Ăn ít', none: 'Không ăn' };
 export const SLEEP_LABEL = { good: 'Ngủ ngon', normal: 'Bình thường', bad: 'Khó ngủ' };
 export const MOOD_LABEL = { happy: 'Vui vẻ', normal: 'Bình thường', sad: 'Buồn', sick: 'Mệt' };

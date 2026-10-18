@@ -13,6 +13,7 @@ export const PATHS = {
   principal: {
     root: '/principal',
     classes: '/principal/classes',
+    classDetail: (id) => `/principal/classes/${id}`,
     students: '/principal/students',
     teachers: '/principal/teachers',
     menus: '/principal/menus',
