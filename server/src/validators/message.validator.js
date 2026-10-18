@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { objectId, dateStr } from './common.validator.js';
+import { objectId, dateStr, assetUrl } from './common.validator.js';
 
 export const userIdParams = { params: z.object({ userId: objectId }) };
 
@@ -15,7 +15,7 @@ export const sendMessageSchema = {
       student: objectId.optional(),
       content: z.string().trim().max(4000).optional(),
       attachments: z
-        .array(z.object({ url: z.string().url(), type: z.enum(['image', 'file']).optional(), name: z.string().max(200).optional() }))
+        .array(z.object({ url: assetUrl, type: z.enum(['image', 'file']).optional(), name: z.string().max(200).optional() }))
         .max(5)
         .optional(),
     })

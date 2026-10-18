@@ -10,9 +10,6 @@ export const history = asyncHandler(async (req, res) => sendSuccess(res, await s
 export const send = asyncHandler(async (req, res) => sendCreated(res, await svc.send(req.user, req.body), 'Đã gửi'));
 export const markRead = asyncHandler(async (req, res) => sendSuccess(res, await svc.markRead(req.user, req.params.userId), 'Đã đọc'));
 export const upload = asyncHandler(async (req, res) => {
-  const r = await uploadService.uploadBuffer(req.file.buffer, {
-    folder: 'kindercare/messages',
-    resourceType: req.file.mimetype.startsWith('image/') ? 'image' : 'raw',
-  });
-  sendSuccess(res, { ...r, type: req.file.mimetype.startsWith('image/') ? 'image' : 'file', name: req.file.originalname }, 'Upload thành công');
+  const r = await uploadService.uploadBuffer(req.file.buffer, { folder: 'messages', mimetype: req.file.mimetype });
+  sendSuccess(res, { url: r.url, key: r.key, type: req.file.mimetype.startsWith('image/') ? 'image' : 'file', name: req.file.originalname }, 'Upload thành công');
 });

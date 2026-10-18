@@ -14,6 +14,7 @@ import { Avatar, Button, Input, Modal } from '../../components/ui/index.js';
 import { FormError } from '../../components/shared/FormError.jsx';
 import { PATHS } from '../../router/paths.js';
 import { formatAge } from '../../utils/format.js';
+import { compressImage, validateImage, ACCEPT_IMAGES } from '../../utils/image.js';
 
 const profileSchema = z.object({
   fullName: z.string().trim().min(2, 'Họ tên tối thiểu 2 ký tự.').max(100),
@@ -76,9 +77,11 @@ export default function AccountPage() {
   };
   const changeAvatar = async (file) => {
     if (!file) return;
+    const bad = validateImage(file);
+    if (bad) return toast.error(bad);
     setUploading(true);
     try {
-      const { url } = await uploadApi.image(file);
+      const { url } = await uploadApi.image(await compressImage(file, { maxSize: 800 }));
       const updated = await authApi.updateMe({ avatar: url });
       setUser({ ...user, ...updated, children: user.children });
       toast.success('Đã đổi ảnh đại diện');
@@ -101,7 +104,7 @@ export default function AccountPage() {
           <label className="relative cursor-pointer">
             <Avatar src={user?.avatar} name={user?.fullName} role="parent" size="xl" />
             <span className="absolute -bottom-1 -right-1 inline-flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface text-ink-soft"><Camera size={16} aria-hidden /></span>
-            <input type="file" accept="image/*" className="sr-only" onChange={(e) => changeAvatar(e.target.files[0])} disabled={uploading} aria-label="Đổi ảnh đại diện" />
+            <input type="file" accept={ACCEPT_IMAGES} className="sr-only" onChange={(e) => { changeAvatar(e.target.files[0]); e.target.value = ''; }} disabled={uploading} aria-label="Đổi ảnh đại diện" />
           </label>
           <div className="min-w-0">
             <p className="truncate font-display text-lg font-semibold">{user?.fullName}</p>

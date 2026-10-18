@@ -13,10 +13,21 @@ import { FormError } from '../../components/shared/FormError.jsx';
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
 import { PageHeader } from '../../components/layout/PageHeader.jsx';
 import { formatDate, toInputDate } from '../../utils/format.js';
+import { compressImages, validateImage, ACCEPT_IMAGES } from '../../utils/image.js';
 
 /* ---------- Chọn ảnh có xem trước ---------- */
 function FilePicker({ files, setFiles, max = 20 }) {
-  const add = (list) => setFiles((f) => [...f, ...[...list]].slice(0, max));
+  // Kiểm tra định dạng/kích thước rồi nén về ~1600px trước khi thêm vào danh sách
+  const add = async (list) => {
+    const ok = [];
+    for (const f of list) {
+      const err = validateImage(f);
+      if (err) toast.error(err);
+      else ok.push(f);
+    }
+    const small = await compressImages(ok);
+    setFiles((f) => [...f, ...small].slice(0, max));
+  };
   return (
     <div>
       <div className="flex flex-wrap gap-2">
@@ -29,11 +40,11 @@ function FilePicker({ files, setFiles, max = 20 }) {
         {files.length < max && (
           <label className="flex h-20 w-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-photo border border-dashed border-line text-xs text-ink-soft hover:bg-paper">
             <ImagePlus size={20} aria-hidden /> Thêm ảnh
-            <input type="file" accept="image/*" multiple className="sr-only" onChange={(e) => add(e.target.files)} />
+            <input type="file" accept={ACCEPT_IMAGES} multiple className="sr-only" onChange={(e) => { add(e.target.files); e.target.value = ''; }} />
           </label>
         )}
       </div>
-      <p className="mt-1 text-xs text-ink-soft">{files.length}/{max} ảnh · JPG/PNG, mỗi ảnh tối đa 5MB.</p>
+      <p className="mt-1 text-xs text-ink-soft">{files.length}/{max} ảnh · JPG, PNG, WebP, HEIC · tối đa 10MB, tự nén về 1600px.</p>
     </div>
   );
 }

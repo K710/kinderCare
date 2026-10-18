@@ -113,14 +113,15 @@ test('report: PH đánh dấu đã xem (idempotent); GV sửa/xoá; PH không s�
 });
 
 /* ---------- Album ---------- */
-test('album tạo multipart: thiếu title 400; GV lớp khác 403; có ảnh nhưng chưa cấu hình Cloudinary 503; không ảnh → 201', async () => {
+test('album tạo multipart: thiếu title 400; GV lớp khác 403; có ảnh → 201 (driver local, link ký); không ảnh → 201', async () => {
   let r = await multipart('POST', '/api/v1/albums', tok.t1, { class: ids.c1 });
   assert.equal(r.status, 400);
   r = await multipart('POST', '/api/v1/albums', tok.t2, { title: 'Dã ngoại', class: ids.c1 });
   assert.equal(r.status, 403);
-  r = await multipart('POST', '/api/v1/albums', tok.t1, { title: 'Dã ngoại', class: ids.c1 }, [{ field: 'photos', type: 'image/png', name: 'a.png' }]);
-  assert.equal(r.status, 503);
-  assert.equal(r.body.code, 'UPLOAD_DISABLED');
+  r = await multipart('POST', '/api/v1/albums', tok.t1, { title: 'Có ảnh', class: ids.c1 }, [{ field: 'photos', type: 'image/png', name: 'a.png' }]);
+  assert.equal(r.status, 201);
+  assert.match(r.body.data.photos[0].url, /^\/api\/v1\/files\/local\/albums\/.+\?exp=\d+&sig=/);
+  await app.call('DELETE', `/api/v1/albums/${r.body.data._id}`, { token: tok.t1 }); // không ảnh hưởng các test đếm album phía sau
   r = await multipart('POST', '/api/v1/albums', tok.t1, { title: 'Dã ngoại', class: ids.c1, date: D, description: 'Công viên' });
   assert.equal(r.status, 201);
   assert.equal(r.body.data.class.name, 'Mầm 1');
@@ -197,11 +198,12 @@ test('album chi tiết/sửa/caption/xoá ảnh/xoá album theo quyền', async 
 });
 
 /* ---------- Upload ---------- */
-test('upload: không file 400; parent gọi /images 403; có file nhưng chưa cấu hình → 503', async () => {
+test('upload: không file 400; parent gọi /images 403; có file → 200 link ký', async () => {
   let r = await multipart('POST', '/api/v1/upload/image', tok.p1, {});
   assert.equal(r.status, 400);
   r = await multipart('POST', '/api/v1/upload/images', tok.p1, {}, [{ field: 'files', type: 'image/png', name: 'a.png' }]);
   assert.equal(r.status, 403);
   r = await multipart('POST', '/api/v1/upload/image', tok.p1, {}, [{ field: 'file', type: 'image/jpeg', name: 'a.jpg' }]);
-  assert.equal(r.status, 503);
+  assert.equal(r.status, 200);
+  assert.match(r.body.data.url, /^\/api\/v1\/files\/local\/misc\/.+\.jpg\?exp=/);
 });

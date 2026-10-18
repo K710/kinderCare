@@ -9,6 +9,7 @@ import { useAuth } from '../../hooks/useAuth.js';
 import { toast } from '../../stores/toast.store.js';
 import { Avatar, Button, Skeleton, EmptyState, Modal, SearchInput } from '../../components/ui/index.js';
 import { fromNow, formatTime, formatDate } from '../../utils/format.js';
+import { compressImage, MAX_UPLOAD_MB } from '../../utils/image.js';
 import dayjs from '../../utils/dayjs.js';
 
 const POLL_MS = 10000; // dự phòng khi chưa có socket (GĐ7.1)
@@ -82,7 +83,7 @@ function Thread({ other, onBack }) {
     try {
       const attachments = [];
       for (const f of files) {
-        const up = await messageApi.upload(f);
+        const up = await messageApi.upload(await compressImage(f));
         attachments.push({ url: up.url, type: up.type, name: up.name });
       }
       const msg = await messageApi.send({ receiver: otherId, content: content || undefined, attachments: attachments.length ? attachments : undefined, student: other.students?.length === 1 ? other.students[0]._id : undefined });
@@ -134,7 +135,17 @@ function Thread({ other, onBack }) {
         <form className="flex items-end gap-2" onSubmit={(e) => { e.preventDefault(); send(); }}>
           <label className="touch flex cursor-pointer items-center justify-center rounded-btn text-ink-soft hover:bg-paper" aria-label="Đính kèm">
             <Paperclip size={20} aria-hidden />
-            <input type="file" className="sr-only" accept="image/*,.pdf,.doc,.docx" onChange={(e) => e.target.files[0] && setFiles((a) => [...a, e.target.files[0]].slice(0, 5))} />
+            <input
+              type="file"
+              className="sr-only"
+              accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.pdf"
+              onChange={(e) => {
+                const f = e.target.files[0];
+                if (f && f.size > MAX_UPLOAD_MB * 1024 * 1024) toast.error(`Tệp vượt ${MAX_UPLOAD_MB}MB`);
+                else if (f) setFiles((a) => [...a, f].slice(0, 5));
+                e.target.value = '';
+              }}
+            />
           </label>
           <textarea
             value={text}

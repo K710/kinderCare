@@ -113,14 +113,15 @@ export async function setStatus(id, status) {
 }
 
 export async function updateAvatar(id, file) {
-  const st = await Student.findById(id).select('avatarPublicId');
+  const st = await Student.findById(id).select('avatar');
   if (!st) throw ApiError.notFound('Không tìm thấy học sinh');
-  const { url, publicId } = await uploadService.uploadBuffer(file.buffer, {
-    folder: 'kindercare/students',
+  const { ref, key } = await uploadService.uploadBuffer(file.buffer, {
+    folder: 'students',
+    mimetype: file.mimetype,
     transformation: uploadService.AVATAR_TRANSFORM,
   });
-  const old = st.avatarPublicId;
-  await Student.updateOne({ _id: id }, { $set: { avatar: url, avatarPublicId: publicId } });
-  await uploadService.deleteByPublicId(old);
-  return { avatar: url };
+  const old = st.avatar;
+  await Student.updateOne({ _id: id }, { $set: { avatar: ref, avatarPublicId: key } });
+  await uploadService.deleteByRef(old);
+  return { avatar: ref }; // sendSuccess đổi thành link ký
 }

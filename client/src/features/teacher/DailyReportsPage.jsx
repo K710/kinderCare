@@ -13,6 +13,7 @@ import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
 import { PageHeader } from '../../components/layout/PageHeader.jsx';
 import { MEAL_LABEL, SLEEP_LABEL, MOOD_LABEL } from '../../utils/constants.js';
 import { formatDateFull, toInputDate, formatSleep } from '../../utils/format.js';
+import { compressImages, validateImage, ACCEPT_IMAGES } from '../../utils/image.js';
 
 const MEALS = [
   { key: 'breakfast', label: 'Sáng' },
@@ -68,9 +69,12 @@ function ReportFields({ form, setForm, withPhotos = false }) {
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
   const upload = async (files) => {
     if (!files.length) return;
+    const picked = [...files].slice(0, 10 - (form.photos?.length || 0));
+    const bad = picked.map(validateImage).find(Boolean);
+    if (bad) return toast.error(bad);
     setUploading(true);
     try {
-      const res = await uploadApi.images([...files].slice(0, 10 - (form.photos?.length || 0)));
+      const res = await uploadApi.images(await compressImages(picked));
       set({ photos: [...(form.photos || []), ...res.map((r) => r.url)] });
     } catch (e) {
       toast.error(errorMessage(e));
@@ -106,7 +110,7 @@ function ReportFields({ form, setForm, withPhotos = false }) {
             {(form.photos?.length || 0) < 10 && (
               <label className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-photo border border-dashed border-line text-ink-soft hover:bg-paper">
                 <ImagePlus size={20} aria-hidden />
-                <input type="file" accept="image/*" multiple className="sr-only" onChange={(e) => upload(e.target.files)} disabled={uploading} />
+                <input type="file" accept={ACCEPT_IMAGES} multiple className="sr-only" onChange={(e) => { upload(e.target.files); e.target.value = ''; }} disabled={uploading} />
               </label>
             )}
           </div>

@@ -7,7 +7,7 @@ import { toDateKey } from '../utils/date.js';
 import { ROLES } from '../config/constants.js';
 import * as uploadService from './upload.service.js';
 
-const FOLDER = 'kindercare/albums';
+const FOLDER = 'albums';
 const MAX_PHOTOS = 100;
 
 // Lớp mà user được xem album: T = lớp phụ trách, PH = lớp của con, A/P = tất cả (null)
@@ -55,10 +55,11 @@ export async function create(user, data, files = []) {
   if (files.length > MAX_PHOTOS) throw ApiError.badRequest(`Tối đa ${MAX_PHOTOS} ảnh / album`);
 
   const photos = files.length ? await uploadService.uploadMany(files, { folder: FOLDER }) : [];
+  // DB lưu asset ref (asset://…); link có chữ ký được tạo lúc trả response
   const album = await Album.create({
     ...data,
     date: toDateKey(data.date || new Date()),
-    photos: photos.map((p) => ({ url: p.url, publicId: p.publicId })),
+    photos: photos.map((p) => ({ url: p.ref, publicId: p.key })),
     createdBy: user.id,
   });
   return getById(album._id);
@@ -76,7 +77,7 @@ export async function addPhotos(doc, files) {
     throw ApiError.badRequest(`Album chỉ chứa tối đa ${MAX_PHOTOS} ảnh (hiện ${doc.photos.length})`);
   }
   const uploaded = await uploadService.uploadMany(files, { folder: FOLDER });
-  doc.photos.push(...uploaded.map((p) => ({ url: p.url, publicId: p.publicId })));
+  doc.photos.push(...uploaded.map((p) => ({ url: p.ref, publicId: p.key })));
   await doc.save();
   return getById(doc._id);
 }
@@ -92,14 +93,14 @@ export async function setCaption(doc, photoId, caption) {
 export async function removePhoto(doc, photoId) {
   const photo = doc.photos.id(photoId);
   if (!photo) throw ApiError.notFound('Không tìm thấy ảnh');
-  const publicId = photo.publicId;
+  const ref = photo.url;
   photo.deleteOne();
   await doc.save();
-  await uploadService.deleteByPublicId(publicId);
+  await uploadService.deleteByRef(ref);
 }
 
 export async function remove(doc) {
-  const publicIds = doc.photos.map((p) => p.publicId).filter(Boolean);
+  const refs = doc.photos.map((p) => p.url);
   await doc.deleteOne();
-  await Promise.all(publicIds.map((id) => uploadService.deleteByPublicId(id)));
+  await Promise.all(refs.map((r) => uploadService.deleteByRef(r)));
 }

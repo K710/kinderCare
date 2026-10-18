@@ -4,3 +4,4 @@ uploads/
 logs/
 dist/
 .DS_Store
+uploads-test-*/

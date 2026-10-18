@@ -159,7 +159,7 @@ test('sửa hồ sơ: strict, không nhận parents/class; setParents; setStatus
   assert.equal(r.body.data.length, 1);
 });
 
-test('avatar: không file 400; sai định dạng 400; không cấu hình Cloudinary 503; GV lớp khác 403', async () => {
+test('avatar: không file 400; sai định dạng 400; upload local → 200 link ký; GV lớp khác 403', async () => {
   const form = (type, name) => {
     const fd = new FormData();
     fd.append('avatar', new Blob([Buffer.from('fake')], { type }), name);
@@ -179,8 +179,8 @@ test('avatar: không file 400; sai định dạng 400; không cấu hình Cloudi
   assert.equal(r.body.code, 'UPLOAD_TYPE');
 
   r = await send(ids.s1, tok.principal, form('image/png', 'a.png'));
-  assert.equal(r.status, 503);
-  assert.equal(r.body.code, 'UPLOAD_DISABLED');
+  assert.equal(r.status, 200);
+  assert.match(r.body.data.avatar, /^\/api\/v1\/files\/local\/students\/.+\?exp=/);
 
   r = await send(ids.s1, tok.t2, form('image/png', 'a.png'));
   assert.equal(r.status, 403);

@@ -8,6 +8,7 @@ const handler = (req, res) => {
 export const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 1000,
+  skip: (req) => req.originalUrl.startsWith('/api/v1/files/'), // ảnh có chữ ký: 1 trang tải nhiều ảnh, không tính vào hạn mức API
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   handler,

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { APPROVAL_STATUS } from '../config/constants.js';
-import { objectId, dateStr, paginationQuery } from './common.validator.js';
+import { objectId, dateStr, paginationQuery, assetUrl } from './common.validator.js';
 
 const activity = z.object({
   time: z.string().trim().max(30).optional(),
@@ -25,7 +25,7 @@ export const createPlanSchema = {
     weekStart: dateStr,
     theme: z.string().trim().max(200).optional(),
     days: days.optional(),
-    attachments: z.array(z.string().url()).max(10).optional(),
+    attachments: z.array(assetUrl).max(10).optional(),
   }),
 };
 
@@ -35,7 +35,7 @@ export const updatePlanSchema = {
     .object({
       theme: z.string().trim().max(200).optional(),
       days: days.optional(),
-      attachments: z.array(z.string().url()).max(10).optional(),
+      attachments: z.array(assetUrl).max(10).optional(),
     })
     .strict(),
 };

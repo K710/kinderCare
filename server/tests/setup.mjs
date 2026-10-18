@@ -1,5 +1,11 @@
 // Khởi tạo DB cho test: ưu tiên TEST_MONGO_URI (Mongo thật), không có thì dùng MongoMemoryReplSet (có transaction)
 import mongoose from 'mongoose';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
+// Upload trong test: driver local, thư mục riêng theo process (xoá ở teardownDB)
+process.env.STORAGE_DRIVER ??= 'local';
+process.env.UPLOAD_DIR ??= `uploads-test-${process.pid}`;
 
 let repl = null;
 
@@ -24,6 +30,7 @@ export async function teardownDB() {
   await mongoose.connection.db.dropDatabase();
   await mongoose.disconnect();
   if (repl) await repl.stop();
+  await fs.rm(path.resolve(process.cwd(), process.env.UPLOAD_DIR), { recursive: true, force: true });
 }
 
 // Khởi động app trên cổng ngẫu nhiên, trả về helper gọi HTTP

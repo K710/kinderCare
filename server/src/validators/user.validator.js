@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { ROLE_LIST } from '../config/constants.js';
-import { objectId, phone, password, boolStr, paginationQuery } from './common.validator.js';
+import { objectId, phone, password, boolStr, paginationQuery, assetUrl } from './common.validator.js';
 
 export const listUsersSchema = {
   query: paginationQuery.extend({
@@ -27,7 +27,7 @@ export const updateUserSchema = {
       email: z.string().trim().toLowerCase().email().optional(),
       phone: phone.nullable().optional(),
       role: z.enum(ROLE_LIST).optional(),
-      avatar: z.string().url().optional(),
+      avatar: assetUrl.optional(),
     })
     .strict(),
 };

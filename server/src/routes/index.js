@@ -20,6 +20,7 @@ import messageRoutes from './message.routes.js';
 import auditLogRoutes from './auditLog.routes.js';
 import dashboardRoutes from './dashboard.routes.js';
 import paymentRoutes from './payment.routes.js';
+import fileRoutes from './file.routes.js';
 
 const router = Router();
 
@@ -46,5 +47,6 @@ router.use('/messages', messageRoutes);
 router.use('/audit-logs', auditLogRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/payments', paymentRoutes);
+router.use('/files', fileRoutes); // link ảnh có chữ ký, không cần JWT
 
 export default router;

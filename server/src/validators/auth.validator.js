@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { ROLE_LIST } from '../config/constants.js';
-import { phone, password } from './common.validator.js';
+import { phone, password, assetUrl } from './common.validator.js';
 
 export const loginSchema = {
   body: z.object({
@@ -25,7 +25,7 @@ export const updateMeSchema = {
     .object({
       fullName: z.string().trim().min(2).max(100).optional(),
       phone: phone.optional(),
-      avatar: z.string().url().optional(),
+      avatar: assetUrl.optional(),
     })
     .strict(),
 };

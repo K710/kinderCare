@@ -21,6 +21,13 @@ const schema = z.object({
     .default('false')
     .transform((v) => v === 'true'),
 
+  // Lưu trữ ảnh/tệp: local (thư mục UPLOAD_DIR, dev) hoặc cloudinary (type authenticated)
+  STORAGE_DRIVER: z.enum(['local', 'cloudinary']).default('local'),
+  UPLOAD_DIR: z.string().default('uploads'),
+  FILE_URL_TTL_HOURS: z.coerce.number().min(1).max(72).default(3), // link ảnh có chữ ký sống bao lâu
+  FILE_URL_SECRET: z.string().optional().default(''), // trống → dùng JWT_ACCESS_SECRET
+  API_PUBLIC_URL: z.string().default(''), // prefix tuyệt đối cho link ảnh khi client khác origin (vd https://api.truong.vn)
+
   CLOUDINARY_CLOUD_NAME: z.string().optional().default(''),
   CLOUDINARY_API_KEY: z.string().optional().default(''),
   CLOUDINARY_API_SECRET: z.string().optional().default(''),

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { DAILY_REPORT_ENUMS as E } from '../models/DailyReport.js';
-import { objectId, dateStr } from './common.validator.js';
+import { objectId, dateStr, assetUrl } from './common.validator.js';
 
 const meal = z.enum(E.MEAL);
 
@@ -11,7 +11,7 @@ const content = {
   toilet: z.number().int().min(0).max(20).optional(),
   activities: z.array(z.string().trim().min(1).max(100)).max(20).optional(),
   comment: z.string().trim().max(2000).optional(),
-  photos: z.array(z.string().url()).max(10).optional(),
+  photos: z.array(assetUrl).max(10).optional(),
 };
 
 export const listReportsSchema = {
