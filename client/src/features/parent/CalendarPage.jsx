@@ -8,8 +8,8 @@ import { attendanceApi } from '../../api/attendance.api.js';
 import { dailyReportApi } from '../../api/dailyReport.api.js';
 import { Chip, Skeleton, EmptyState, IconButton, StatusChip } from '../../components/ui/index.js';
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
-import { ATTENDANCE_STATUS, MEAL_LABEL, SLEEP_LABEL, MOOD_LABEL } from '../../utils/constants.js';
-import { formatDateFull } from '../../utils/format.js';
+import { ATTENDANCE_STATUS, MEAL_LABEL, MOOD_LABEL } from '../../utils/constants.js';
+import { formatDateFull, formatSleep } from '../../utils/format.js';
 import dayjs from '../../utils/dayjs.js';
 
 const DOT = { present: 'bg-leaf', late: 'bg-sky', excused: 'bg-sun', absent: 'bg-peach' };
@@ -105,7 +105,7 @@ export default function CalendarPage() {
               {rep.meals?.snack && <span><Utensils size={14} className="mr-1 inline" aria-hidden />Xế: {MEAL_LABEL[rep.meals.snack]}</span>}
             </p>
             <p className="flex flex-wrap gap-x-4 gap-y-1">
-              {(rep.sleep?.quality || rep.sleep?.duration) && <span><Moon size={14} className="mr-1 inline" aria-hidden />Ngủ: {rep.sleep.duration ? `${rep.sleep.duration} phút` : ''} {rep.sleep.quality ? SLEEP_LABEL[rep.sleep.quality] : ''}</span>}
+              {formatSleep(rep.sleep) && <span><Moon size={14} className="mr-1 inline" aria-hidden />Ngủ: {formatSleep(rep.sleep)}</span>}
               {rep.mood && <span><Smile size={14} className="mr-1 inline" aria-hidden />{MOOD_LABEL[rep.mood]}</span>}
             </p>
             {rep.activities?.length > 0 && <p className="text-ink-soft">Hoạt động: {rep.activities.join(', ')}</p>}
@@ -115,7 +115,7 @@ export default function CalendarPage() {
                 {rep.photos.map((u) => <a key={u} href={u} target="_blank" rel="noreferrer"><img src={u} alt="" className="h-20 w-20 shrink-0 rounded-photo object-cover" loading="lazy" /></a>)}
               </div>
             )}
-            {rep.teacher && <p className="text-xs text-ink-soft">Cô {rep.teacher.fullName}</p>}
+            {rep.teacher && <p className="text-xs text-ink-soft">Cô/Thầy {rep.teacher.fullName} nhắn</p>}
           </div>
         ) : (
           <p className="mt-3 text-sm text-ink-soft">Không có nhận xét ngày này.</p>

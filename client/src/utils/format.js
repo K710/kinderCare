@@ -29,6 +29,22 @@ export const toMonday = (d) => dayjs(d).startOf('isoWeek').format('YYYY-MM-DD');
 export const currentMonth = () => dayjs().format('YYYY-MM');
 export const toInputDate = (d) => (d ? dayjs(d).format('YYYY-MM-DD') : '');
 
+// Giấc ngủ: { duration (phút), quality } → "1 giờ 30 phút · Ngủ ngon" (null nếu trống)
+const SLEEP_QUALITY = { good: 'Ngủ ngon', normal: 'Bình thường', bad: 'Khó ngủ' };
+export function formatSleep(sleep) {
+  if (!sleep) return null;
+  const parts = [];
+  if (sleep.duration) {
+    const h = Math.floor(sleep.duration / 60);
+    const m = sleep.duration % 60;
+    parts.push([h ? `${h} giờ` : '', m ? `${m} phút` : ''].filter(Boolean).join(' '));
+  }
+  if (sleep.quality) parts.push(SLEEP_QUALITY[sleep.quality] || sleep.quality);
+  return parts.length ? parts.join(' · ') : null;
+}
+// Tên gọi của bé: tên ở nhà nếu có, không thì tên đầy đủ
+export const childName = (c) => c?.nickname || c?.fullName || '';
+
 // Tuổi: "3 tuổi 4 tháng"
 export function formatAge(dob) {
   const months = dayjs().diff(dayjs(dob), 'month');

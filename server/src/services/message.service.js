@@ -14,7 +14,7 @@ export async function contacts(user) {
   if (user.role === ROLES.TEACHER) {
     const classIds = (await Class.find({ teachers: user.id, isActive: true }).select('_id').lean()).map((c) => c._id);
     const students = await Student.find({ class: { $in: classIds }, status: 'active' })
-      .select('fullName avatar class parents')
+      .select('fullName nickname avatar class parents')
       .populate('parents', USER_FIELDS)
       .populate('class', 'name')
       .lean();
@@ -23,14 +23,14 @@ export async function contacts(user) {
       for (const p of s.parents) {
         const key = p._id.toString();
         if (!map.has(key)) map.set(key, { user: p, students: [] });
-        map.get(key).students.push({ _id: s._id, fullName: s.fullName, avatar: s.avatar, class: s.class });
+        map.get(key).students.push({ _id: s._id, fullName: s.fullName, nickname: s.nickname, avatar: s.avatar, class: s.class });
       }
     }
     return [...map.values()];
   }
   if (user.role === ROLES.PARENT) {
     const kids = await Student.find({ parents: user.id, status: 'active', class: { $ne: null } })
-      .select('fullName avatar class')
+      .select('fullName nickname avatar class')
       .populate({ path: 'class', select: 'name teachers', populate: { path: 'teachers', select: USER_FIELDS } })
       .lean();
     const map = new Map();
@@ -38,7 +38,7 @@ export async function contacts(user) {
       for (const t of k.class?.teachers || []) {
         const key = t._id.toString();
         if (!map.has(key)) map.set(key, { user: t, students: [] });
-        map.get(key).students.push({ _id: k._id, fullName: k.fullName, avatar: k.avatar, class: { _id: k.class._id, name: k.class.name } });
+        map.get(key).students.push({ _id: k._id, fullName: k.fullName, nickname: k.nickname, avatar: k.avatar, class: { _id: k.class._id, name: k.class.name } });
       }
     }
     return [...map.values()];

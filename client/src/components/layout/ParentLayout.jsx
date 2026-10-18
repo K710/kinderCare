@@ -9,7 +9,7 @@ import { PARENT_TABS } from '../../router/menus.js';
 import { PATHS } from '../../router/paths.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useUiStore } from '../../stores/ui.store.js';
-import { formatDateFull } from '../../utils/format.js';
+import { formatDateFull, childName } from '../../utils/format.js';
 
 // Chọn bé (khi có nhiều con) – hiển thị ở header PH
 export function ChildSwitcher() {
@@ -41,16 +41,17 @@ export function ChildSwitcher() {
             >
               {children.map((c) => (
                 <option key={c._id} value={c._id}>
-                  {c.fullName}
+                  {childName(c)}
                 </option>
               ))}
             </select>
             <ChevronDown size={18} className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-ink-soft" aria-hidden />
           </label>
         ) : (
-          <p className="truncate font-display text-lg font-semibold leading-tight">{child.fullName}</p>
+          <p className="truncate font-display text-lg font-semibold leading-tight">{childName(child)}</p>
         )}
         <p className="truncate text-xs text-ink-soft">
+          {child.nickname ? `${child.fullName} · ` : ''}
           {child.class?.name ? `${child.class.name} · ` : ''}
           {formatDateFull(new Date())}
         </p>

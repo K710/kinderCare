@@ -11,12 +11,11 @@ import { CalendarDays } from 'lucide-react';
 import { Chip, Skeleton, EmptyState, StatusChip } from '../../components/ui/index.js';
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
 import { PATHS } from '../../router/paths.js';
-import { ATTENDANCE_STATUS, MEAL_LABEL, SLEEP_LABEL, MOOD_LABEL, DAY_LABEL } from '../../utils/constants.js';
-import { formatMoney, formatTime } from '../../utils/format.js';
+import { ATTENDANCE_STATUS, MEAL_LABEL, MOOD_LABEL, DAY_LABEL } from '../../utils/constants.js';
+import { formatMoney, formatTime, formatSleep, childName } from '../../utils/format.js';
 import dayjs from '../../utils/dayjs.js';
 
 const mealText = (v) => (v ? MEAL_LABEL[v] : null);
-const sleepText = (s) => (s?.duration ? `${Math.floor(s.duration / 60) ? `${Math.floor(s.duration / 60)} giờ ` : ''}${s.duration % 60 ? `${s.duration % 60} phút` : ''}`.trim() : s?.quality ? SLEEP_LABEL[s.quality] : null);
 
 // Trang chủ PH: dòng thời gian một ngày của bé + lời nhắn của cô + thực đơn hôm nay
 export default function TodayPage() {
@@ -64,9 +63,8 @@ export default function TodayPage() {
       ) : null,
     });
     items.push({ key: 'lunch', time: '11:00', title: 'Ăn trưa', icon: Utensils, state: mealText(rep?.meals?.lunch) ? 'done' : 'pending', detail: mealText(rep?.meals?.lunch) || (todayMenu?.lunch?.length ? todayMenu.lunch.join(', ') : undefined) });
-    items.push({ key: 'nap', time: '12:00', title: 'Ngủ trưa', icon: Moon, state: sleepText(rep?.sleep) ? 'done' : 'pending', detail: sleepText(rep?.sleep) ? `${sleepText(rep.sleep)}${rep.sleep?.quality && rep.sleep?.duration ? ` · ${SLEEP_LABEL[rep.sleep.quality]}` : ''}` : undefined });
+    items.push({ key: 'nap', time: '12:00', title: 'Ngủ trưa', icon: Moon, state: formatSleep(rep?.sleep) ? 'done' : 'pending', detail: formatSleep(rep?.sleep) || undefined });
     items.push({ key: 'snack', time: '14:30', title: 'Ăn xế', icon: Utensils, state: mealText(rep?.meals?.snack) ? 'done' : 'pending', detail: mealText(rep?.meals?.snack) || (todayMenu?.snack?.length ? todayMenu.snack.join(', ') : undefined) });
-    if (rep?.mood) items.push({ key: 'mood', time: '', title: `Tâm trạng: ${MOOD_LABEL[rep.mood]}`, icon: Smile, state: 'done' });
     items.push({ key: 'out', time: att?.checkOutAt ? formatTime(att.checkOutAt) : '16:30', title: 'Về nhà', icon: LogOut, state: att?.checkOutAt ? 'done' : 'pending' });
   }
 
@@ -85,7 +83,10 @@ export default function TodayPage() {
       <section className="card p-4">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg">Hôm nay của bé</h2>
-          {att ? <StatusChip map={ATTENDANCE_STATUS} value={att.status} /> : <Chip tone="muted">Chưa điểm danh</Chip>}
+          <div className="flex flex-wrap items-center justify-end gap-1.5">
+            {att ? <StatusChip map={ATTENDANCE_STATUS} value={att.status} /> : <Chip tone="muted">Chưa điểm danh</Chip>}
+            {rep?.mood && <Chip tone={rep.mood === 'happy' ? 'leaf' : rep.mood === 'sick' ? 'peach' : rep.mood === 'sad' ? 'sun' : 'sky'} icon={Smile}>{MOOD_LABEL[rep.mood]}</Chip>}
+          </div>
         </div>
         {loading ? (
           <div className="space-y-3"><Skeleton className="h-5 w-2/3" /><Skeleton className="h-5 w-1/2" /><Skeleton className="h-5 w-3/5" /></div>
@@ -110,7 +111,10 @@ export default function TodayPage() {
       <section className="card p-4">
         <h2 className="text-base">Lời nhắn của cô</h2>
         {loading ? <Skeleton className="mt-2 h-10 w-full" /> : rep?.comment ? (
-          <p className="mt-2 whitespace-pre-line text-sm leading-relaxed">“{rep.comment}”</p>
+          <>
+            {rep.teacher?.fullName && <p className="mt-2 text-sm text-ink-soft">Cô/Thầy {rep.teacher.fullName} nhắn:</p>}
+            <p className="mt-1 whitespace-pre-line text-sm leading-relaxed">“{rep.comment}”</p>
+          </>
         ) : (
           <p className="mt-2 text-sm text-ink-soft">Cô chưa gửi lời nhắn hôm nay. Thường có sau giờ ngủ trưa.</p>
         )}

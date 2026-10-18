@@ -3,54 +3,66 @@ import { Wallet, ChevronRight, Baby, CircleCheck } from 'lucide-react';
 import { useFetch } from '../../hooks/useFetch.js';
 import { useSelectedChild } from '../../hooks/useSelectedChild.js';
 import { tuitionApi } from '../../api/tuition.api.js';
-import { Skeleton, EmptyState, StatusChip, Button } from '../../components/ui/index.js';
+import { Skeleton, EmptyState, StatusChip, Button, Avatar } from '../../components/ui/index.js';
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
 import { PATHS } from '../../router/paths.js';
 import { TUITION_STATUS } from '../../utils/constants.js';
-import { formatMoney, formatMonth, formatDate } from '../../utils/format.js';
+import { formatMoney, formatMonth, formatDate, childName } from '../../utils/format.js';
 
-// Học phí của bé đang chọn: khoản chưa đóng lên đầu, bấm "Thanh toán" → trang QR
+// "Gồm học phí, tiền ăn"
+export const itemsText = (items = []) => (items.length ? `Gồm ${items.map((i) => i.name.charAt(0).toLowerCase() + i.name.slice(1)).join(', ')}` : '');
+
+// Học phí của TẤT CẢ các con, nhóm theo bé; ô tổng cộng mọi bé
 export default function ParentTuitionsPage() {
-  const { child, childId } = useSelectedChild();
+  const { children } = useSelectedChild();
   const { data, loading, error, reload } = useFetch(tuitionApi.my, []);
-  if (!child) return <EmptyState icon={Baby} title="Chưa có thông tin bé" />;
+  if (!children.length) return <EmptyState icon={Baby} title="Chưa có thông tin bé" />;
 
-  const mine = (data || []).filter((t) => (t.student?._id || t.student) === childId);
-  const due = mine.filter((t) => t.status !== 'paid');
-  const paid = mine.filter((t) => t.status === 'paid');
+  const all = data || [];
+  const due = all.filter((t) => t.status !== 'paid');
   const totalDue = due.reduce((s, t) => s + (t.amount - t.paidAmount), 0);
+  // Nhóm theo bé, theo thứ tự danh sách con
+  const groups = children.map((c) => ({ child: c, items: all.filter((t) => (t.student?._id || t.student) === c._id) })).filter((g) => g.items.length);
 
   return (
     <div className="space-y-4">
       <ErrorBanner message={error} onRetry={reload} />
       <section className="card flex items-center justify-between gap-3 p-4">
         <div>
-          <p className="text-sm text-ink-soft">Còn phải đóng</p>
+          <p className="text-sm text-ink-soft">Còn phải đóng{children.length > 1 ? ` (${children.length} bé)` : ''}</p>
           <p className="font-display text-2xl font-bold tabular-nums">{loading ? '…' : formatMoney(totalDue)}</p>
-          <p className="text-xs text-ink-soft">{due.length ? `${due.length} khoản · mỗi bé chuyển khoản riêng theo mã` : 'Bé đã đóng đủ, cảm ơn ba mẹ!'}</p>
+          <p className="text-xs text-ink-soft">{loading ? '' : due.length ? `${due.length} tháng chưa đóng · mỗi bé chuyển khoản riêng theo mã` : 'Đã đóng đủ, cảm ơn ba mẹ!'}</p>
         </div>
-        <span className={`inline-flex h-12 w-12 items-center justify-center rounded-full ${totalDue ? 'bg-sun-soft text-[#8A6100]' : 'bg-leaf-soft text-leaf'}`}>{totalDue ? <Wallet size={24} strokeWidth={1.75} aria-hidden /> : <CircleCheck size={24} strokeWidth={1.75} aria-hidden />}</span>
+        <span className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${totalDue ? 'bg-sun-soft text-[#8A6100]' : 'bg-leaf-soft text-leaf'}`}>
+          {totalDue ? <Wallet size={24} strokeWidth={1.75} aria-hidden /> : <CircleCheck size={24} strokeWidth={1.75} aria-hidden />}
+        </span>
       </section>
 
       {loading ? (
         <div className="space-y-2">{[0, 1].map((i) => <Skeleton key={i} className="h-24 rounded-card" />)}</div>
-      ) : !mine.length ? (
+      ) : !all.length ? (
         <EmptyState icon={Wallet} title="Chưa có học phí" description="Nhà trường chưa tạo khoản thu cho bé." />
       ) : (
-        <>
-          {due.length > 0 && (
-            <section>
-              <h2 className="mb-2 text-base">Cần thanh toán</h2>
-              <ul className="space-y-2">{due.map((t) => <TuitionCard key={t._id} t={t} />)}</ul>
+        groups.map(({ child, items }) => {
+          const childDue = items.filter((t) => t.status !== 'paid');
+          const childPaid = items.filter((t) => t.status === 'paid');
+          return (
+            <section key={child._id}>
+              <div className="mb-2 flex items-center gap-3">
+                <Avatar src={child.avatar} name={child.fullName} size="sm" />
+                <div className="min-w-0">
+                  <h2 className="truncate text-base">{childName(child)}</h2>
+                  <p className="truncate text-xs text-ink-soft">{child.nickname ? `${child.fullName} · ` : ''}{child.class?.name || 'Chưa xếp lớp'}</p>
+                </div>
+                {childDue.length > 0 && <span className="ml-auto text-sm font-medium tabular-nums text-[#8A6100]">{childDue.length} tháng chưa đóng</span>}
+              </div>
+              <ul className="space-y-2">
+                {childDue.map((t) => <TuitionCard key={t._id} t={t} />)}
+                {childPaid.map((t) => <TuitionCard key={t._id} t={t} />)}
+              </ul>
             </section>
-          )}
-          {paid.length > 0 && (
-            <section>
-              <h2 className="mb-2 text-base">Đã đóng</h2>
-              <ul className="space-y-2">{paid.map((t) => <TuitionCard key={t._id} t={t} />)}</ul>
-            </section>
-          )}
-        </>
+          );
+        })
       )}
     </div>
   );
@@ -63,7 +75,7 @@ function TuitionCard({ t }) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-display text-base font-semibold">{formatMonth(t.month)}</p>
-          <p className="text-xs text-ink-soft">Hạn {formatDate(t.dueDate)} · {t.items?.length || 0} khoản</p>
+          <p className="text-xs text-ink-soft">Hạn {formatDate(t.dueDate)} · {itemsText(t.items)}</p>
         </div>
         <StatusChip map={TUITION_STATUS} value={t.status} />
       </div>

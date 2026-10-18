@@ -12,7 +12,7 @@ import { ClassSelect } from '../../components/shared/ClassSelect.jsx';
 import { ErrorBanner } from '../../components/shared/ErrorBanner.jsx';
 import { PageHeader } from '../../components/layout/PageHeader.jsx';
 import { MEAL_LABEL, SLEEP_LABEL, MOOD_LABEL } from '../../utils/constants.js';
-import { formatDateFull, toInputDate } from '../../utils/format.js';
+import { formatDateFull, toInputDate, formatSleep } from '../../utils/format.js';
 
 const MEALS = [
   { key: 'breakfast', label: 'Sáng' },
@@ -194,7 +194,7 @@ export default function DailyReportsPage() {
                 <p className="truncate text-sm font-medium">{s.fullName}</p>
                 {r ? (
                   <p className="truncate text-xs text-ink-soft">
-                    {[r.meals?.lunch && `Trưa: ${MEAL_LABEL[r.meals.lunch]}`, r.sleep?.quality && SLEEP_LABEL[r.sleep.quality], r.mood && MOOD_LABEL[r.mood], r.comment].filter(Boolean).join(' · ') || 'Đã có nhận xét'}
+                    {[r.meals?.lunch && `Trưa: ${MEAL_LABEL[r.meals.lunch]}`, formatSleep(r.sleep), r.mood && MOOD_LABEL[r.mood], r.comment].filter(Boolean).join(' · ') || 'Đã có nhận xét'}
                   </p>
                 ) : (
                   <p className="text-xs text-ink-soft">Chưa có nhận xét</p>

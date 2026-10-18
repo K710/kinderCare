@@ -105,7 +105,7 @@ function Thread({ other, onBack }) {
         <Avatar name={other.user.fullName} src={other.user.avatar} role={other.user.role} size="sm" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium">{other.user.fullName}</p>
-          {other.students?.length > 0 && <p className="truncate text-xs text-ink-soft">{other.students.map((s) => `${s.fullName}${s.class?.name ? ` (${s.class.name})` : ''}`).join(', ')}</p>}
+          {other.students?.length > 0 && <p className="truncate text-xs text-ink-soft">{other.students.map((s) => `${s.class?.name ? `${s.class.name} · ` : ''}${s.nickname || s.fullName}`).join(' | ')}</p>}
         </div>
       </div>
       <div className="flex-1 space-y-2 overflow-y-auto bg-paper px-3 py-3">
@@ -175,7 +175,7 @@ export default function ChatPage() {
       {/* Danh sách hội thoại */}
       <aside className={clsx('w-full shrink-0 flex-col border-r border-line md:flex md:w-80', activeId ? 'hidden' : 'flex')}>
         <div className="flex items-center justify-between gap-2 border-b border-line px-3 py-2">
-          <h2 className="text-base">Tin nhắn</h2>
+          <span className="text-sm text-ink-soft">{convs?.length ? `${convs.length} hội thoại` : ''}</span>
           <Button size="sm" variant="secondary" icon={Plus} onClick={() => setPickOpen(true)}>Mới</Button>
         </div>
         <div className="flex-1 overflow-y-auto">
@@ -192,6 +192,9 @@ export default function ChatPage() {
                     <Avatar name={c.user?.fullName} src={c.user?.avatar} role={c.user?.role} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2"><p className={clsx('truncate text-sm', c.unread ? 'font-semibold' : 'font-medium')}>{c.user?.fullName || 'Người dùng'}</p><span className="shrink-0 text-[11px] text-ink-soft">{fromNow(c.lastMessage.createdAt)}</span></div>
+                      {contactMap.get(c.user?._id)?.students?.length > 0 && (
+                        <p className="truncate text-[11px] text-ink-soft">{contactMap.get(c.user._id).students.map((s) => `${s.class?.name || ''} · ${s.nickname || s.fullName}`).join(' | ')}</p>
+                      )}
                       <div className="flex items-center justify-between gap-2"><p className={clsx('truncate text-xs', c.unread ? 'text-ink' : 'text-ink-soft')}>{c.lastMessage.sender === user?._id ? 'Bạn: ' : ''}{c.lastMessage.content || (c.lastMessage.attachments?.length ? '[Tệp đính kèm]' : '')}</p>{c.unread > 0 && <span className="min-w-[18px] rounded-full bg-sun px-1 text-center text-[11px] font-semibold leading-[18px] text-ink">{c.unread}</span>}</div>
                     </div>
                   </button>
@@ -219,7 +222,7 @@ export default function ChatPage() {
               <li key={c.user._id}>
                 <button type="button" onClick={() => open(c.user._id)} className="flex w-full items-center gap-3 px-1 py-2.5 text-left hover:bg-paper">
                   <Avatar name={c.user.fullName} src={c.user.avatar} role={c.user.role} size="sm" />
-                  <div className="min-w-0"><p className="truncate text-sm font-medium">{c.user.fullName}</p><p className="truncate text-xs text-ink-soft">{c.students.map((s) => `${s.fullName}${s.class?.name ? ` · ${s.class.name}` : ''}`).join(', ')}</p></div>
+                  <div className="min-w-0"><p className="truncate text-sm font-medium">{c.user.fullName}</p><p className="truncate text-xs text-ink-soft">{c.students.map((s) => `${s.class?.name ? `${s.class.name} · ` : ''}${s.nickname || s.fullName}`).join(' | ')}</p></div>
                 </button>
               </li>
             ))}
