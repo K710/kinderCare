@@ -8,6 +8,7 @@
 5. Comment tiếng Việt ở chỗ quan trọng. UI tiếng Việt.
 6. Task giao diện (GĐ5–6): đọc `DESIGN.md` trước, dùng đúng token/component đã định. Task backend không cần đọc.
 7. Quyết định làm khác CLAUDE.md, hoặc liên quan thanh toán, bảo mật, phân quyền: dừng hỏi trước khi làm. Quyết định khác: tự làm, ghi vào Quyết định, và liệt kê tên các quyết định mới trong tóm tắt cuối giai đoạn.
+8. Xong mỗi task (sau khi tick PROGRESS.md): dừng lại commit ngay, mỗi task một commit, message tiếng Việt dạng `GĐx.y: việc đã làm`, rồi mới sang task tiếp theo. Không push nếu chưa được yêu cầu.
 
 ## Stack
 - Client `/client`: React (Vite), React Router v6, Zustand, Axios, TailwindCSS, React Hook Form + Zod, Socket.IO client
